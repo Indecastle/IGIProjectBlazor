@@ -1,0 +1,68 @@
+﻿@page "/counter"
+@using Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> _signInManager
+@inject UserManager<User> _userManager
+@inject UserManager<User> _userManager2
+
+<h1>Counter @text | @text2</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<br />
+<table class="table">
+    <tr><th>Email</th><th>Год</th><th></th></tr>
+    @foreach (var user in users)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>@user.Year</td>
+            <td>
+                <form asp-action="Delete" asp-route-id="@user.Id" method="post">
+                    <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@user.Id">Изменить</a>
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
+
+@code {
+    List<User> users;
+    string text = default;
+    string text2 = default;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = _userManager.Users.ToList();
+        text2 = (_userManager == _userManager2).ToString();
+    }
+    private int currentCount = 0;
+
+    [Parameter]
+    public int IncrementAmount { get; set; } = 1;
+
+    private async Task IncrementCount()
+    {
+        currentCount += IncrementAmount;
+        User user = new User { Email = $"andrey{currentCount}", UserName = $"andrey{currentCount}", Year = currentCount };
+        // добавляем пользователя
+        var result = await _userManager.CreateAsync(user, (currentCount * 100).ToString());
+        if (result.Succeeded)
+        {
+            // установка куки
+            //await _signInManager.SignInAsync(user, false);
+            users = _userManager.Users.ToList();
+            text = "OK";
+        }
+        else
+        {
+            text = "Bad";
+        }
+    }
+
+
+}
