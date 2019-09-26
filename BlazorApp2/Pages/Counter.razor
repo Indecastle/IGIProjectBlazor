@@ -1,9 +1,9 @@
 ﻿@page "/counter"
-@using Models
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<User> _signInManager
 @inject UserManager<User> _userManager
-@inject UserManager<User> _userManager2
+@inject IAuthorizationService AuthorizationService
+@using Microsoft.AspNetCore.Http
 
 <h1>Counter @text | @text2</h1>
 
@@ -35,26 +35,38 @@
     string text = default;
     string text2 = default;
 
+    //[CascadingParameter]
+    //private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         users = _userManager.Users.ToList();
-        text2 = (_userManager == _userManager2).ToString();
+        text2 = text;
     }
     private int currentCount = 0;
 
     [Parameter]
     public int IncrementAmount { get; set; } = 1;
 
-    private async Task IncrementCount()
+    protected async Task IncrementCount()
     {
         currentCount += IncrementAmount;
-        User user = new User { Email = $"andrey{currentCount}", UserName = $"andrey{currentCount}", Year = currentCount };
+        User user = new User { Email = $"andrey{currentCount}@tut.by", UserName = $"andrey{currentCount}@tut.by", Year = currentCount };
         // добавляем пользователя
-        var result = await _userManager.CreateAsync(user, (currentCount * 100).ToString());
+        var result = await _userManager.CreateAsync(user, $"Qwe`123{currentCount}");
         if (result.Succeeded)
         {
+            var user3 = await _signInManager.UserManager.FindByEmailAsync(user.UserName);
+            await _signInManager.SignInAsync(user3, false);
+
+            //httpContextAccessor.HttpContext.
+
+            //var user2 = (await authenticationStateTask).User;
+            //await AuthorizationService.AuthorizeAsync(user2, "content-editor");
             // установка куки
+            //await prov._signInManager.SignInAsync(user, true);
             //await _signInManager.SignInAsync(user, false);
+            //await _signInManager.PasswordSignInAsync(user.Email, (currentCount * 100).ToString(), false, false);
             users = _userManager.Users.ToList();
             text = "OK";
         }
@@ -63,6 +75,5 @@
             text = "Bad";
         }
     }
-
 
 }

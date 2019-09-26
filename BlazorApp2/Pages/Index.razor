@@ -3,4 +3,11 @@
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
-
+<br />
+<AuthorizeView>
+    <Authorized>
+        <h2>Name: @context.User.Identity.Name!</h2>
+        <h3>IsAuthenticated: @context.User.Identity.IsAuthenticated!</h3>
+        <h4>AuthenticationType: @context.User.Identity.AuthenticationType!</h4>
+    </Authorized>
+</AuthorizeView>
