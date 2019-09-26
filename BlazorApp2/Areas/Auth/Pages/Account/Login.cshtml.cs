@@ -35,8 +35,8 @@ namespace BlazorApp2.Pages
             _signInManager = signInManager;
             _userManager = userManager;
         }
-        [BindProperty]
-        public string ReturnUrl { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string ReturnUrl { get; set; } = "~/";
         public async Task<IActionResult> OnPostAsync()
         {
             //string returnUrl = Url.Content("~/");
