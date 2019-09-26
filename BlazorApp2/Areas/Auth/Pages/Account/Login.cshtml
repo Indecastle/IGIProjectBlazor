@@ -3,4 +3,25 @@
 @{
     ViewData["Title"] = "Log in";
 }
-<h2>Login</h2>
+<h2>Вход в приложение</h2>
+<form method="post"
+      asp-route-returnUrl="@Model.ReturnUrl">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div>
+        <label for="Email"></label><br />
+        <input for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label for="Password"></label><br />
+        <input for="Password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <label for="RememberMe"></label><br />
+        <input for="RememberMe" />
+    </div>
+    <div>
+        <input type="submit" value="Войти" />
+    </div>
+</form>
