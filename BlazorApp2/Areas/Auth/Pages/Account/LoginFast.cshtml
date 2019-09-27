@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using BlazorApp2.Models
 @inject SignInManager<User> _signInManager
-@model BlazorApp2.Pages.LoginModel
+
 @{
     ViewData["Title"] = "Log in";
 }
@@ -14,8 +14,10 @@
         string returnUrl = Url.Content("~/");
         try
         {
-            // Clear the existing external cookie
+            if (_signInManager.IsSignedIn(User))
+        {
             await _signInManager.SignOutAsync();
+        }
         }
         catch { }
         var user3 = await _signInManager.UserManager.FindByEmailAsync(paramUsername);
