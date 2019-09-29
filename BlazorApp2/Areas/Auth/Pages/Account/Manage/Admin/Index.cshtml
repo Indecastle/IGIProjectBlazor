@@ -1,0 +1,29 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.IndexModel
+@inject RoleManager<IdentityRole> _roleManager;
+@{
+    ViewData["ActivePage"] = ManageNavPages.AdminRoles;
+    string[] mainRoles = new[] { "admin", "user" };
+}
+<h2>Список ролей</h2>
+<div asp-validation-summary="All" class="text-danger"></div>
+<table class="table">
+    @foreach (var role in _roleManager.Roles)
+    {
+        <tr>
+            <td>@role.Name</td>
+            <td>
+                @if (!mainRoles.Contains(role.Name))
+                {
+                    <form asp-page-handler="Delete" asp-route-id="@role.Id" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Удалить
+                        </button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+</table>
+<a asp-page="./Create">Добавить роль</a>
+<a asp-page="./UserList">Список пользователей</a>

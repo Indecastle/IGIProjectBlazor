@@ -1,0 +1,12 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.CreateModel
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+    <div class="form-group">
+        <label for="name">Новая роль</label>
+        <input name="name" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form>

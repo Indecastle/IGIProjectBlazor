@@ -4,13 +4,14 @@
 @attribute [IgnoreAntiforgeryToken]
 @inject SignInManager<User> SignInManager
 @functions {
-    public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(string returnUrl = null)
     {
+        returnUrl = returnUrl ?? Url.Content("~/");
         if (SignInManager.IsSignedIn(User))
         {
             await SignInManager.SignOutAsync();
         }
 
-        return LocalRedirect(Url.Content("~/"));
+        return LocalRedirect(returnUrl);
     }
 }

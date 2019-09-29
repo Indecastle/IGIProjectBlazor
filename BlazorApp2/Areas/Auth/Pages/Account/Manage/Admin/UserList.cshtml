@@ -1,0 +1,15 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.UserListModel
+
+<h2>Список пользователей</h2>
+<table class="table">
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-page="./Edit" asp-route-userid="@user.Id">Права доступа</a>
+            </td>
+        </tr>
+    }
+</table>

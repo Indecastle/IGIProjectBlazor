@@ -1,0 +1,16 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.EditModel
+ 
+<h2>Изменение ролей для пользователя @Model.Input.UserEmail</h2>
+ 
+<form method="POST">
+    <input type="hidden" name="userId" value="@Model.Input.UserId" />
+    <div class="form-group">
+        @foreach (IdentityRole role in Model.Input.AllRoles)
+        {
+            <input type="checkbox" name="roles" value="@role.Name"
+                   @(Model.Input.UserRoles.Contains(role.Name) ? "checked=\"checked\"" : "") />@role.Name <br />
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>

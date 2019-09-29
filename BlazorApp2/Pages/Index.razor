@@ -11,3 +11,8 @@ Welcome to your new app.
         <h4>AuthenticationType: @context.User.Identity.AuthenticationType!</h4>
     </Authorized>
 </AuthorizeView>
+
+@code {
+    [CascadingParameter(Name = "TitleValue")]
+    protected string Title { get; set; } = "Index";
+}
