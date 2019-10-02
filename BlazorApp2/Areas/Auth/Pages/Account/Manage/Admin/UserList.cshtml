@@ -1,5 +1,8 @@
 ﻿@page
 @model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.UserListModel
+@{
+    ViewData["ActivePage"] = ManageNavPages.AdminRoles;
+}
 
 <h2>Список пользователей</h2>
 <table class="table">

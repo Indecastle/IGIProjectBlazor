@@ -2,14 +2,21 @@
 
 
 <h1>Parent-child example</h1>
+<p>ParentYear: @ParentYear</p>
 
 <ChildComponent Title="Panel Title from Parent"
-                OnClick="@ShowMessage">
+                OnClick="@ShowMessage" @bind-Year="ParentYear">
     Content of the child component is supplied
     by the parent component.
 </ChildComponent>
 
+<button class="btn btn-primary" @onclick="ChangeTheYear">
+    Change Year to 1986
+</button>
+
 <p><b>@messageText</b></p>
+<br />
+<PasswordField @bind-Password="messageText" />
 
 @code {
     private string messageText;
@@ -17,5 +24,13 @@
     private void ShowMessage(MouseEventArgs e)
     {
         messageText = "Blaze a new trail with Blazor!";
+    }
+
+    [Parameter]
+    public int ParentYear { get; set; } = 1978;
+
+    private void ChangeTheYear()
+    {
+        ParentYear = 1986;
     }
 }

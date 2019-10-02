@@ -1,27 +1,9 @@
 ﻿@page
 @using Microsoft.AspNetCore.Identity
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using BlazorApp2.Models
 @inject SignInManager<User> _signInManager
+@model LoginFast
 
-@{
-    ViewData["Title"] = "Log in";
-}
+
 <h2>Login</h2>
-
-@functions {
-    public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword)
-    {
-        string returnUrl = Url.Content("~/");
-        try
-        {
-            if (_signInManager.IsSignedIn(User))
-        {
-            await _signInManager.SignOutAsync();
-        }
-        }
-        catch { }
-        var user3 = await _signInManager.UserManager.FindByEmailAsync(paramUsername);
-        await _signInManager.PasswordSignInAsync(user3, paramPassword, true, true);
-        return LocalRedirect(returnUrl);
-    }
-}

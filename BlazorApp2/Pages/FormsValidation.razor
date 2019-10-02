@@ -1,0 +1,60 @@
+﻿@page "/FormsValidation"
+
+<h1>Starfleet Starship Database</h1>
+
+<h2>New Ship Entry Form</h2>
+
+<EditForm Model="@starship" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <p>
+        <label for="identifier">Identifier: </label>
+        <InputText id="identifier" @bind-Value="starship.Identifier" />
+        <ValidationMessage For="@(() => starship.Identifier)" />
+    </p>
+    <p>
+        <label for="description">Description (optional): </label>
+        <InputTextArea id="description" @bind-Value="starship.Description" />
+        <ValidationMessage For="@(() => starship.Description)" />
+    </p>
+    <p>
+        <label for="classification">Primary Classification: </label>
+        <InputSelect id="classification" @bind-Value="starship.Classification">
+            <option value="">Select classification ...</option>
+            <option value="Exploration">Exploration</option>
+            <option value="Diplomacy">Diplomacy</option>
+            <option value="Defense">Defense</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => starship.Classification)" />
+    </p>
+    <p>
+        <label for="accommodation">Maximum Accommodation: </label>
+        <InputNumber id="accommodation" @bind-Value="starship.MaximumAccommodation" />
+    </p>
+    <p>
+        <label for="valid">Engineering Approval: </label>
+        <InputCheckbox id="valid" @bind-Value="starship.IsValidatedDesign" />
+    </p>
+    <p>
+        <label for="productionDate">Production Date: </label>
+        <InputDate id="productionDate" @bind-Value="starship.ProductionDate" />
+    </p>
+
+    <button type="submit">Submit</button>
+
+    <p>
+        <a href="http://www.startrek.com/">Star Trek</a>,
+        &copy;1966-2019 CBS Studios, Inc. and
+        <a href="https://www.paramount.com">Paramount Pictures</a>
+    </p>
+</EditForm>
+
+@code {
+    private Starship starship = new Starship();
+
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("Hello world");
+    }
+}

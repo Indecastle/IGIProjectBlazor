@@ -1,5 +1,8 @@
 ﻿@page
 @model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.CreateModel
+@{
+    ViewData["ActivePage"] = ManageNavPages.AdminRoles;
+}
 
 <div asp-validation-summary="All" class="text-danger"></div>
 
