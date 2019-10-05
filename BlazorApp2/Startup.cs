@@ -20,6 +20,7 @@ using System.Text;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace BlazorApp2
 {
@@ -38,7 +39,9 @@ namespace BlazorApp2
         {
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<User, IdentityRole>(opts => {
+            services.AddIdentity<User, IdentityRole>(opts =>
+            {
+                //opts.Cookies.ApplicationCookie.AccessDeniedPath = new PathString("/InactiveSponsor");
                 opts.Password.RequiredLength = 5;   // минимальная длина
                 opts.Password.RequireNonAlphanumeric = false;   // требуются ли не алфавитно-цифровые символы
                 opts.Password.RequireLowercase = false; // требуются ли символы в нижнем регистре
@@ -52,20 +55,36 @@ namespace BlazorApp2
                 .AddEntityFrameworkStores<ApplicationContext>()
                 .AddDefaultTokenProviders();
 
-            /*services.AddAuthentication(sharedoptions => {
-                sharedoptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedoptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie();*/
+            services.ConfigureApplicationCookie(options =>
+            {
+                //options.LoginPath = new PathString("/[your-path]");
+                options.AccessDeniedPath = new PathString("/Auth/Account/AccessDenied");
+                //options.LogoutPath = new PathString("/[your-path]");
+            });
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
+            services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    IConfigurationSection googleAuthNSection =
+                        Configuration.GetSection("web");
+
+                    options.ClientId = googleAuthNSection["client_id"];
+                    options.ClientSecret = googleAuthNSection["client_secret"];
+                    //options.ReturnUrlParameter = googleAuthNSection["redirect_uris"];
+                    options.CallbackPath = "/Index";
+                });
+
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<NotifierService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, NotifierService notifier)
         {
             if (env.IsDevelopment())
             {
@@ -93,6 +112,8 @@ namespace BlazorApp2
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            notifier.Cycle();
         }
     }
 }

@@ -14,10 +14,11 @@
 </head>
 <body>
 
-        @(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))
+    @(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))
 
 
     <script src="_framework/blazor.server.js"></script>
+    <script src="inputfile.js"></script>
 </body>
 </html>
 

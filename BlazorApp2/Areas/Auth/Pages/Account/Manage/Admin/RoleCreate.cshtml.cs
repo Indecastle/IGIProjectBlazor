@@ -9,34 +9,40 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
 {
-    public class IndexModel : PageModel
+    public class CreateModel : PageModel
     {
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        public string name { get; set; }
 
-        public IndexModel(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public CreateModel(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(string id)
+        public void OnGet() { }
+
+        public async Task<IActionResult> OnPostAsync(string name = null)
         {
-            IdentityRole role = await _roleManager.FindByIdAsync(id);
-            if (role != null)
+            if (!string.IsNullOrEmpty(name))
             {
-                if (role.Name != "admin" && role.Name != "user")
+                IdentityResult result = await _roleManager.CreateAsync(new IdentityRole(name));
+                if (result.Succeeded)
                 {
-                    IdentityResult result = await _roleManager.DeleteAsync(role);
+                    return RedirectToPage("RoleIndex");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, $"нельзя удалить {role.Name}");
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
-            return RedirectToPage("./Index");
+            return Page();
         }
     }
 }

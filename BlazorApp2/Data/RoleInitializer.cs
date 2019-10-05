@@ -32,4 +32,30 @@ namespace BlazorApp2.Data
             }
         }
     }
+
+    public class NotifierService
+    {
+        private int counter1, counter2;
+        // Can be called from anywhere
+        public async Task Update(string key, int value)
+        {
+            if (Notify != null)
+            {
+                await Notify.Invoke(key, value);
+            }
+        }
+
+        public async void Cycle()
+        {
+            while (true)
+            {
+                counter1 += 1;
+                counter2 += 2;
+                await Update(counter1.ToString(), counter2);
+                await Task.Delay(1000);
+            }
+        }
+
+        public event Func<string, int, Task> Notify;
+    }
 }

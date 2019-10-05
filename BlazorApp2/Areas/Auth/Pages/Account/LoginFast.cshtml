@@ -3,7 +3,28 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using BlazorApp2.Models
 @inject SignInManager<User> _signInManager
-@model LoginFast
 
+@attribute [IgnoreAntiforgeryToken]
 
 <h2>Login</h2>
+
+@functions {
+    public async Task<IActionResult> OnPostAsync(string username, string password)
+    {
+        //Console.WriteLine(username + ",  " + password);
+        string returnUrl = Url.Content("~/");
+        try
+        {
+            if (_signInManager.IsSignedIn(User))
+            {
+                await _signInManager.SignOutAsync();
+            }
+        }
+        catch { }
+        var user3 = await _signInManager.UserManager.FindByEmailAsync(username);
+        if (user3 != null)
+            await _signInManager.PasswordSignInAsync(user3, password, true, true);
+        return LocalRedirect(returnUrl);
+    }
+}
+}

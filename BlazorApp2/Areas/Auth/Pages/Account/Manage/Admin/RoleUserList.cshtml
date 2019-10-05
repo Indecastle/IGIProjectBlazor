@@ -1,0 +1,29 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.UserListModel
+@attribute [Authorize(Roles = "admin")]
+@{
+    ViewData["ActivePage"] = ManageNavPages.AdminRoles;
+}
+
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+<h2>Список пользователей</h2>
+<table class="table">
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.Email</td>
+            <td>
+                @if (User.Identity.Name != user.UserName || true)
+                {
+
+                }
+                <form asp-page="RoleEdit" asp-route-userid="@user.Id" method="get">
+                    <button type="submit" class="btn btn-sm btn-danger" @(User.Identity.Name == user.UserName ? "disabled" : "")>
+                        Права доступа
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

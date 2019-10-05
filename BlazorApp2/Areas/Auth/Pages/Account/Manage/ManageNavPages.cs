@@ -21,6 +21,7 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
 
         public static string AdminRoles => "AdminRoles";
+        public static string AdminUsers => "AdminUsers";
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 
@@ -35,6 +36,7 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
 
         public static string AdminRolesNavClass(ViewContext viewContext) => PageNavClass(viewContext, AdminRoles);
+        public static string AdminUsersNavClass(ViewContext viewContext) => PageNavClass(viewContext, AdminUsers);
 
         private static string PageNavClass(ViewContext viewContext, string page)
         {

@@ -1,5 +1,6 @@
 ﻿@page
 @model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.IndexModel
+@attribute [Authorize(Roles="admin")]
 @inject RoleManager<IdentityRole> _roleManager;
 @{
     ViewData["ActivePage"] = ManageNavPages.AdminRoles;
@@ -25,5 +26,5 @@
         </tr>
     }
 </table>
-<a asp-page="./Create">Добавить роль</a>
-<a asp-page="./UserList">Список пользователей</a>
+<a asp-page="RoleCreate">Добавить роль</a>
+<a asp-page="RoleUserList">Список пользователей</a>

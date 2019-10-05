@@ -1,0 +1,25 @@
+﻿@page
+@model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.UserCreateModel
+@attribute [Authorize(Roles = "admin")]
+@{
+    ViewBag.Title = "Добавление пользователя";
+    ViewData["ActivePage"] = ManageNavPages.AdminUsers;
+}
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Input.Email" class="control-label">Email</label>
+        <input type="text" asp-for="Input.Email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Input.Password" class="control-label">Пароль</label>
+        <input type="password" asp-for="Input.Password" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Input.Year" class="control-label">Год рождения</label>
+        <input type="number" asp-for="Input.Year" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Добавить" class="btn btn-default" />
+    </div>
+</form>

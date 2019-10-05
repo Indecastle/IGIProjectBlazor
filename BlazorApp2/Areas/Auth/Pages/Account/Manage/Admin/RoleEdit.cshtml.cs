@@ -72,11 +72,44 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
                 // получаем роли, которые были удалены
                 var removedRoles = userRoles.Except(roles);
 
+                /*if (!((user.UserName != "andred9991@gmail.com" && User.Identity.Name == "andred9991@gmail.com") || !(await _userManager.IsInRoleAsync(user, "admin"))))
+                {
+                    if (addedRoles.Contains("admin") && User.Identity.Name == "andred9991@gmail.com")
+                    {
+                        TempData["StatusMessage"] = "Error: Access Denied";
+                        return RedirectToPage("RoleUserList");
+                    }
+                }*/
+
+                if(User.Identity.Name != "andred9991@gmail.com")
+                {
+                    if (user.UserName == "andred9991@gmail.com")
+                    {
+                        TempData["StatusMessage"] = "Error: Access Denied";
+                        return RedirectToPage("RoleUserList");
+                    }
+                    else if (addedRoles.Contains("admin") || removedRoles.Contains("admin"))
+                    {
+                        TempData["StatusMessage"] = "Error: Access Denied";
+                        return RedirectToPage("RoleUserList");
+                    }
+                }
+                else if(user.UserName == "andred9991@gmail.com" && removedRoles.Contains("admin"))
+                {
+                    TempData["StatusMessage"] = "Error: Access Denied";
+                    return RedirectToPage("RoleUserList");
+                }
+
                 await _userManager.AddToRolesAsync(user, addedRoles);
 
                 await _userManager.RemoveFromRolesAsync(user, removedRoles);
 
-                return RedirectToPage("./UserList");
+                if (user.UserName == User.Identity.Name)
+                {
+                    await _signInManager.RefreshSignInAsync(user);
+                }
+
+                return RedirectToPage("RoleUserList");
             }
 
             return NotFound();

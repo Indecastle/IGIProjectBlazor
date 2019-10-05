@@ -18,6 +18,9 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
             _userManager = userManager;
         }
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
         public void OnGet()
         {
             Users = _userManager.Users.ToList();

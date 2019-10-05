@@ -1,5 +1,6 @@
 ﻿@page
 @model BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin.CreateModel
+@attribute [Authorize(Roles = "admin")]
 @{
     ViewData["ActivePage"] = ManageNavPages.AdminRoles;
 }
