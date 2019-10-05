@@ -11,10 +11,12 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
 {
     public class UserIndexModel : PageModel
     {
-        private readonly UserManager<User> _userManager;
-        public UserIndexModel(UserManager<User> userManager)
+        public readonly UserManager<User> _userManager;
+        public readonly RoleManager<IdentityRole> _roleManager;
+        public UserIndexModel(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [TempData]

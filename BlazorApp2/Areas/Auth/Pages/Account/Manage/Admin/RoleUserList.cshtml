@@ -18,8 +18,9 @@
                 {
 
                 }
-                <form asp-page="RoleEdit" asp-route-userid="@user.Id" method="get">
-                    <button type="submit" class="btn btn-sm btn-danger" @(User.Identity.Name == user.UserName ? "disabled" : "")>
+                <form asp-page="RoleEdit" method="get">
+                    <input type="hidden" name="userid2" value="@user.Id" />
+                    <button type="submit" class="btn btn-primary" @(User.Identity.Name == user.UserName ? "disabled" : "")>
                         Права доступа
                     </button>
                 </form>

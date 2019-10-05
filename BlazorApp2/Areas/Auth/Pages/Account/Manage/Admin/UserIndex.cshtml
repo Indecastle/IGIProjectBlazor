@@ -13,13 +13,17 @@
     <tr><th>Email</th><th>Год</th><th></th></tr>
     @foreach (var user in Model.UserLists)
     {
+        string dis = string.Empty;
+        if (User.Identity.Name != "andred9991@gmail.com")
+            dis = (await Model._userManager.IsInRoleAsync(user, "admin")) ? "disabled" : string.Empty;
+
         <tr>
             <td>@user.Email</td>
             <td>@user.Year</td>
             <td>
                 <form asp-page-handler="Delete" asp-route-id="@user.Id" method="post">
-                    <a class="btn btn-sm btn-primary" asp-page="UserEdit" asp-route-id="@user.Id">Изменить</a>
-                    <button type="submit" class="btn btn-sm btn-danger" @(User.Identity.Name == user.UserName ? "disabled" : "")>
+                    <a class="btn btn-sm btn-primary @dis" asp-page="UserEdit" asp-route-id="@user.Id">Изменить</a>
+                    <button type="submit" class="btn btn-sm btn-danger" @dis>
                         Удалить
                     </button>
                 </form>

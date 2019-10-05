@@ -43,6 +43,17 @@ Welcome to your new app.
 </table>
 <input type="type" name="name" value="" />
 
+<div class="form-group">
+    <label>Begin voorverkoop periode</label>
+    <input type="date" name="bday" max="3000-12-31"
+           min="1000-01-01" class="form-control">
+</div>
+<div class="form-group">
+    <label>Einde voorverkoop periode</label>
+    <input type="date" name="bday" min="1000-01-01"
+           max="3000-12-31" class="form-control">
+</div>
+
 @code {
     [CascadingParameter(Name = "TitleValue")]
     protected string Title { get; set; } = "Index";

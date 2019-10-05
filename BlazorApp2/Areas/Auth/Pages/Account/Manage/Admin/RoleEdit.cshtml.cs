@@ -14,7 +14,7 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        [BindProperty(SupportsGet=true)]
+        [BindProperty]
         public ChangeRoleViewModel Input { get; set; }
         public EditModel(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -35,10 +35,10 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
             }
         }
 
-        public async Task<IActionResult> OnGetAsync(string userId)
+        public async Task<IActionResult> OnGetAsync(string userid2)
         {
             // получаем пользователя
-            User user = await _userManager.FindByIdAsync(userId);
+            User user = await _userManager.FindByIdAsync(userid2);
             if (user != null)
             {
                 // получем список ролей пользователя
@@ -53,8 +53,9 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
                 };
                 return Page();
             }
-
-            return NotFound();
+            TempData["StatusMessage"] = $"Error: not found user (userid is {(userid2==null?"null":"bad")})";
+            return RedirectToPage("RoleUserList");
+            //return NotFound();
         }
 
         public async Task<IActionResult> OnPostAsync(string userId, List<string> roles)
@@ -85,7 +86,7 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
                 {
                     if (user.UserName == "andred9991@gmail.com")
                     {
-                        TempData["StatusMessage"] = "Error: Access Denied";
+                        TempData["StatusMessage"] = "Error: superAdmin is god!!!";
                         return RedirectToPage("RoleUserList");
                     }
                     else if (addedRoles.Contains("admin") || removedRoles.Contains("admin"))
@@ -96,7 +97,7 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
                 }
                 else if(user.UserName == "andred9991@gmail.com" && removedRoles.Contains("admin"))
                 {
-                    TempData["StatusMessage"] = "Error: Access Denied";
+                    TempData["StatusMessage"] = "Error: you should be admin!!!";
                     return RedirectToPage("RoleUserList");
                 }
 
@@ -109,10 +110,12 @@ namespace BlazorApp2.Areas.Auth.Pages.Account.Manage.Admin
                     await _signInManager.RefreshSignInAsync(user);
                 }
 
+                TempData["StatusMessage"] = "Good Boy :)";
                 return RedirectToPage("RoleUserList");
             }
 
-            return NotFound();
+            TempData["StatusMessage"] = $"Error: not found user (userid is {(userId == null ? "null" : "bad")})";
+            return RedirectToPage("RoleUserList");
         }
     }
 }
