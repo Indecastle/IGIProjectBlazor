@@ -1,10 +1,12 @@
 ﻿@page "/Files"
+@using System.IO;
+@inject IHostingEnvironment _env;
 
 <h1>Multiple files</h1>
 
 <p>A multi-file picker that displays information about selection and shows progress as each one is loaded.</p>
 
-<InputFile multiple OnChange="HandleSelection" />
+<InputFile multiple OnChange="files => selectedFiles = files" />
 
 @if (selectedFiles != null)
 {
@@ -39,9 +41,10 @@
 @code {
     IFileListEntry[] selectedFiles;
 
-    void HandleSelection(IFileListEntry[] files)
+    protected override async Task OnInitializedAsync()
     {
-        selectedFiles = files;
+        await base.OnInitializedAsync();
+
     }
 
     async Task LoadFile(IFileListEntry file)
@@ -53,5 +56,7 @@
         // Alternatively it could be saved to disk, or parsed in memory, or similar
         var ms = new System.IO.MemoryStream();
         await file.Data.CopyToAsync(ms);
+        //ms.Seek(0, SeekOrigin.Begin);
+        File.WriteAllBytes(Path.Combine(_env.WebRootPath, "download", file.Name), ms.ToArray());
     }
 }
