@@ -21,6 +21,8 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Http;
+using Amazon.S3;
+using Amazon.Extensions.NETCore.Setup;
 
 namespace BlazorApp2
 {
@@ -81,6 +83,9 @@ namespace BlazorApp2
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<NotifierService>();
+            services.AddSingleton<IS3Service, S3Service>();
+            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+            services.AddAWSService<IAmazonS3>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,7 +103,7 @@ namespace BlazorApp2
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

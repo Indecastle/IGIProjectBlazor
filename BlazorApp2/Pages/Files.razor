@@ -1,6 +1,7 @@
 ﻿@page "/Files"
 @using System.IO;
 @inject IHostingEnvironment _env;
+@inject IS3Service _is3;
 
 <h1>Multiple files</h1>
 
@@ -23,7 +24,7 @@
                 Type: <strong>@file.Type</strong>
             </div>
 
-            <!-- Upload button -->
+            <!-- Upload button -->  
             <button @onclick="() => LoadFile(file)" disabled="@isLoading">
                 @if (!isLoading)
                 {
@@ -56,7 +57,10 @@
         // Alternatively it could be saved to disk, or parsed in memory, or similar
         var ms = new System.IO.MemoryStream();
         await file.Data.CopyToAsync(ms);
-        //ms.Seek(0, SeekOrigin.Begin);
-        File.WriteAllBytes(Path.Combine(_env.WebRootPath, "download", file.Name), ms.ToArray());
+        ms.Seek(0, SeekOrigin.Begin);
+        //File.WriteAllBytes(Path.Combine(_env.WebRootPath, "download", file.Name), ms.ToArray());
+        Console.WriteLine("start@@@@@@@@@@@@@@@@@@@");
+        await _is3.UploadBucketAsync(ms);
+        Console.WriteLine("end@@@@@@@@@@@@@@@@@@@");
     }
 }
