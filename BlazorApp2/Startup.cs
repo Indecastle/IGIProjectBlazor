@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Http;
 using Amazon.S3;
 using Amazon.Extensions.NETCore.Setup;
+using EmbeddedBlazorContent;
+using MatBlazor;
 
 namespace BlazorApp2
 {
@@ -67,6 +69,7 @@ namespace BlazorApp2
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddAuthentication()
                 .AddGoogle(options =>
@@ -86,6 +89,16 @@ namespace BlazorApp2
             services.AddSingleton<IS3Service, S3Service>();
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
+
+            services.AddMatToaster(config =>
+            {
+                config.Position = MatToastPosition.BottomRight;
+                config.PreventDuplicates = true;
+                config.NewestOnTop = true;
+                config.ShowCloseButton = true;
+                config.MaximumOpacity = 95;
+                config.VisibleStateDuration = 3000;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -110,6 +123,7 @@ namespace BlazorApp2
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseEmbeddedBlazorContent(typeof(MatBlazor.BaseMatComponent).Assembly);
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,6 +1,7 @@
 ﻿@page "/"
 @namespace BlazorApp2.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using EmbeddedBlazorContent
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,8 +12,8 @@
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
+    @Html.EmbeddedBlazorContent()
 
-    
 </head>
 <body>
 
@@ -21,9 +22,20 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script src="inputfile.js"></script>
+    <script type="text/javascript">
+        function mydownloadFile(filePath) {
+            var link = document.createElement('a');
+            link.href = filePath;
+            link.download = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length);
+            link.target = '_blank'
+            link.click();
+            
+        }
+    </script>
+
 </body>
 </html>
 
 @functions {
-    
+
 }

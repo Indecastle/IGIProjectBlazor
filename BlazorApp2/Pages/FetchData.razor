@@ -13,20 +13,20 @@
 }
 else
 {
-<BlazorGrid Items="@forecasts" PageSize="4">
-    <GridHeader>
-        <th>Date</th>
-        <th>TemperatureC</th>
-        <th>TemperatureF</th>
-        <th>Summary</th>
-    </GridHeader>
-    <GridRow>
-        <td scope="col">@context.Date.ToShortDateString()</td>
-        <td scope="col">@context.TemperatureC</td>
-        <td scope="col">@context.TemperatureF</td>
-        <td scope="col">@context.Summary</td>
-    </GridRow>
-</BlazorGrid>
+    <MyBlazorGrid Items="@forecasts" PageSize="4">
+        <GridHeader>
+            <th>Date</th>
+            <th>TemperatureC</th>
+            <th>TemperatureF</th>
+            <th>Summary</th>
+        </GridHeader>
+        <GridRow>
+            <td scope="col">@context.Date.ToShortDateString()</td>
+            <td scope="col">@context.TemperatureC</td>
+            <td scope="col">@context.TemperatureF</td>
+            <td scope="col">@context.Summary</td>
+        </GridRow>
+    </MyBlazorGrid>
 }
 
 @code {

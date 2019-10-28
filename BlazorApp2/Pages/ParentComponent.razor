@@ -5,7 +5,7 @@
 <p>ParentYear: @ParentYear</p>
 
 <ChildComponent Title="Panel Title from Parent"
-                OnClick="@ShowMessage" @bind-Year="ParentYear">
+                @onclick="@ShowMessage" @bind-Year="ParentYear">
     Content of the child component is supplied
     by the parent component.
 </ChildComponent>
