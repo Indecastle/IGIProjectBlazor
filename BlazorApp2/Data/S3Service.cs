@@ -115,4 +115,53 @@ namespace BlazorApp2.Data
             return urlString;
         }
     }
+
+    public class S3Dir
+    {
+        public string DirPath { get; set; }
+        public string DirName { get; set; }
+        public string BackDirPath { get; set; }
+        public string BackDirName { get; set; }
+        public List<string> SubDirs { get; set; }
+        bool IsRoot { get; set; }
+        public List<S3FileObject> S3Objs { get; set; }
+        public S3Dir()
+        {
+            S3Objs = new List<S3FileObject>();
+        }
+        public S3Dir(IEnumerable<S3Object> s3objects)
+        {
+            DirPath = DirName = BackDirName = BackDirPath = "";
+            IsRoot = true;
+            S3Dir resultDir = new S3Dir();
+            foreach (S3Object obj in s3objects)
+            {
+                string[] ar = obj.Key.Split('/');
+                S3FileObject fobj = new S3FileObject
+                {
+                    Name = ar[1]
+                }
+                resultDir.S3Objs.Add();
+            }
+        }
+        private 
+    }
+
+    public class S3FileObject
+    {
+        public string Name { get; set; }
+        public string Direcory { get; set; }
+        public string FullPathName { get; set; }
+        public long Size { get; set; }
+        public string Owner { get; set; }
+        public DateTime LastModified { get; set; }
+    }
+
+    public static class EnumerableExtensions
+    {
+        public static IEnumerable<T> DistinctBy<T, TKey>(this IEnumerable<T> enumerable, Func<T, TKey> keySelector)
+        {
+            return enumerable.GroupBy(keySelector).Select(grp => grp.First());
+        }
+    }
 }

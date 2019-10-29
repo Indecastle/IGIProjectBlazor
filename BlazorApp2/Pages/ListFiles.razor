@@ -17,6 +17,8 @@
         }
         else
         {
+            <AmazonGrid Dir="Dir" PageSize="10" OnClickRow="GetGenUrl"/>
+
             <MyBlazorGrid Items="@S3ListFiles" PageSize="10" Context="S3file" OnClickRow="GetGenUrl">
                 <GridHeader>
                     <th>Name</th>
@@ -42,7 +44,7 @@
 
 
 @code {
-    IEnumerable<S3Object> S3ListFiles { get; set; }
+    S3Dir Dir { get; set; }
     string currentDir = "";
     async Task CurrentDirChanged(ChangeEventArgs e)
     {
@@ -55,9 +57,9 @@
     {
         await base.OnInitializedAsync();
         await GetListFiles();
-        foreach (S3Object entry in S3ListFiles)
+        foreach (var entry in Dir.S3Objs)
         {
-            Console.WriteLine("------------------------- key = {0} size = {1}", entry.Key, entry.Size);
+            Console.WriteLine("------------------------- key = {0} size = {1}", entry.Name, entry.Size);
         }
     }
 
@@ -80,18 +82,19 @@
         if (await GetIsAuth())
         {
             string userName = await GetUserName();
-            S3ListFiles = await _is3.ListFilesAsync(userName, currentDir);
+            var S3ListFiles = await _is3.ListFilesAsync(userName, currentDir);
+            Dir = new S3Dir(S3ListFiles, currentDir);
             Console.WriteLine("############ IS AUTHED");
         }
         else
         {
-            S3ListFiles = new List<S3Object>();
+            Dir = new S3Dir();
         }
     }
 
-    public async Task GetGenUrl(S3Object obj)
+    public async Task GetGenUrl(S3FileObject obj)
     {
-        string url = _is3.GeneratePreSignedURL(obj.Key);
+        string url = _is3.GeneratePreSignedURL(obj.FullPathName);
         //NavigationManager.NavigateTo(url, false);
         //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
         await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
