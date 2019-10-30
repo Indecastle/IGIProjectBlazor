@@ -7,35 +7,26 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 
-<input @onchange="@CurrentDirChanged" />
-<h3>@currentDir</h3>
 <AuthorizeView>
     <Authorized>
-        @if (S3ListFiles == null)
-        {
-            <p><em>Loading...</em></p>
-        }
-        else
-        {
-            <AmazonGrid Dir="Dir" PageSize="10" OnClickRow="GetGenUrl"/>
+        <AmazonGrid PageSize="10" GetUserName="GetUserName" GetIsAuth="GetIsAuth"/>
+            @*
+                <MyBlazorGrid Items="@S3ListFiles" PageSize="10" Context="S3file" OnClickRow="GetGenUrl">
+                    <GridHeader>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>LastModified</th>
+                        <th>Owner</th>
+                    </GridHeader>
+                    <GridRow>
+                        <td scope="col">@S3file.Key</td>
+                        <td scope="col">@S3file.Size</td>
+                        <td scope="col">@S3file.LastModified</td>
+                        <td scope="col">@S3file.Owner</td>
+                    </GridRow>
+                </MyBlazorGrid>
+            *@
 
-            <MyBlazorGrid Items="@S3ListFiles" PageSize="10" Context="S3file" OnClickRow="GetGenUrl">
-                <GridHeader>
-                    <th>Name</th>
-                    <th>Size</th>
-                    <th>LastModified</th>
-                    <th>Owner</th>
-                </GridHeader>
-                <GridRow>
-                    <td scope="col">@S3file.Key</td>
-                    <td scope="col">@S3file.Size</td>
-                    <td scope="col">@S3file.LastModified</td>
-                    <td scope="col">@S3file.Owner</td>
-                </GridRow>
-            </MyBlazorGrid>
-
-
-        }
     </Authorized>
     <NotAuthorized>
         <h2>"Bad Guy"</h2>
@@ -44,23 +35,9 @@
 
 
 @code {
-    S3Dir Dir { get; set; }
-    string currentDir = "";
-    async Task CurrentDirChanged(ChangeEventArgs e)
-    {
-        currentDir = e.Value.ToString();
-        await GetListFiles();
-        StateHasChanged();
-    }
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await GetListFiles();
-        foreach (var entry in Dir.S3Objs)
-        {
-            Console.WriteLine("------------------------- key = {0} size = {1}", entry.Name, entry.Size);
-        }
     }
 
 
@@ -75,28 +52,5 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         return user.Identity.Name;
-    }
-
-    async Task GetListFiles()
-    {
-        if (await GetIsAuth())
-        {
-            string userName = await GetUserName();
-            var S3ListFiles = await _is3.ListFilesAsync(userName, currentDir);
-            Dir = new S3Dir(S3ListFiles, currentDir);
-            Console.WriteLine("############ IS AUTHED");
-        }
-        else
-        {
-            Dir = new S3Dir();
-        }
-    }
-
-    public async Task GetGenUrl(S3FileObject obj)
-    {
-        string url = _is3.GeneratePreSignedURL(obj.FullPathName);
-        //NavigationManager.NavigateTo(url, false);
-        //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
-        await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
     }
 }

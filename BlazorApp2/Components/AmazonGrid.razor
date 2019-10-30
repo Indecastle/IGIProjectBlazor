@@ -1,4 +1,10 @@
-﻿<table class="table table-striped">
+﻿@inject IS3Service _is3;
+@inject IJSRuntime JsRuntime;
+@using System.IO;
+
+<MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
+<button @onclick="@(() => StateHasChanged())"></button>
+<table class="table table-striped">
     <thead>
         <tr class="blazor-grid-header">
             <th>Name</th>
@@ -8,15 +14,40 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in ItemList)
+        @if (Dir == null)
         {
-            <tr class="blazor-row-item">
-                <td scope="col" @ondblclick="@(async ()=> await OnClickRow(item))">@item.Name</td>
-                <td scope="col">@item.Size</td>
-                <td scope="col">@item.LastModified</td>
-                <td scope="col">@item.Owner</td>
-            </tr>
+            <p><em>Loading...</em></p>
         }
+        else
+        {
+            @foreach (var item in ItemList)
+            {
+                if ((item as S3DirObject) != null)
+                {
+                    var dirobj = item as S3DirObject;
+                    <tr class="blazor-row-item">
+                        <td scope="col" @ondblclick="@(async () => await GoToSubDir(dirobj))"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                    </tr>
+                }
+                else
+                {
+                    var fileobj = item as S3FileObject;
+                    <tr class="blazor-row-item">
+                        <td scope="col" @ondblclick="@(async () => await GetGenUrl(fileobj))"> 
+                            @GetIcon(fileobj)
+                            @fileobj.Name 
+                        </td>
+                        <td scope="col">@fileobj.Size</td>
+                        <td scope="col">@fileobj.LastModified</td>
+                        <td scope="col">@fileobj.Owner</td>
+                    </tr>
+                }
+            }
+        }
+
     </tbody>
 </table>
 
@@ -52,30 +83,82 @@
     int endPage;
 
     [Parameter]
-    public Func<S3FileObject, Task> OnClickRow { get; set; }
+    public Func<Task<string>> GetUserName { get; set; }
+    [Parameter]
+    public Func<Task<bool>> GetIsAuth { get; set; }
 
     [Parameter]
     public int PageSize { get; set; }
 
-    IEnumerable<S3FileObject> ItemList { get; set; }
+    IEnumerable<IS3Object> ItemList { get; set; }
     //IEnumerable<S3FileObject> Items { get; set; }
-    [Parameter]
+
     public S3Dir Dir { get; set; }
+    public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
 
     protected override async Task OnInitializedAsync()
     {
         pagerSize = 5;
         curPage = 1;
 
-        ItemList = Dir.S3Objs.Skip((curPage - 1) * PageSize).Take(PageSize);
-        totalPages = (int)Math.Ceiling(Dir.S3Objs.Count() / (decimal)PageSize);
+        await GetListFiles();
+        ItemList = Dir.SubDirs;
+        ItemList = ItemList.Concat(Dir.S3Objs);
+
+        ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
+        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
 
         SetPagerSize("forward");
     }
 
+    public async Task GetListFiles()
+    {
+        if (await GetIsAuth())
+        {
+            string userName = await GetUserName();
+            var S3ListFiles = await _is3.ListFilesAsync(userName);
+            Dir = new S3Dir(S3ListFiles, userName);
+            Console.WriteLine("############ IS AUTHED");
+        }
+        else
+        {
+            Dir = new S3Dir();
+        }
+    }
+
+    public async Task GoToSubDir(S3DirObject obj)
+    {
+        var S3ListFiles = await _is3.ListFilesAsync(obj.FullPathName);
+        Dir.SubDir(S3ListFiles, obj);
+        updateList(curPage);
+    }
+
+    public async Task GoToBackDir()
+    {
+        var S3ListFiles = await _is3.ListFilesAsync(Dir.BackDirPath);
+        Dir.BackDir(S3ListFiles);
+        updateList(curPage);
+    }
+
+    public async Task GetGenUrl(S3FileObject obj)
+    {
+        string url = _is3.GeneratePreSignedURL(obj.FullPathName);
+        //NavigationManager.NavigateTo(url, false);
+        //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
+        await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
+    }
+
+
+
+
+
+
     public void updateList(int currentPage)
     {
-        ItemList = Dir.S3Objs.Skip((currentPage - 1) * PageSize).Take(PageSize);
+        ItemList = Dir.SubDirs;
+        ItemList = ItemList.Concat(Dir.S3Objs);
+
+        ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
         curPage = currentPage;
         this.StateHasChanged();
     }
@@ -129,4 +212,33 @@
 
         updateList(curPage);
     }
+
+
+
+
+    public RenderFragment GetIcon(S3FileObject obj)
+    {
+        string ext = Path.GetExtension(obj.Name);
+        switch (ext)
+        {
+            case ".pdf": return @<i class="far fa-file-pdf fa-lg" style="color: rgb(234, 67, 53);"></i>;
+
+            case ".txt":
+            case ".docx": return @<i class="far fa-file-word fa-lg" style="color: rgb(66, 133, 244);"></i>;
+
+            case ".mp4":
+            case ".avi": return @<i class="far fa-file-video fa-lg" style="color: orange;"></i>;
+
+            case ".zip":
+            case ".rar": return @<i class="far fa-file-archive fa-lg" style="color: rgb(205, 42, 80);"></i>;
+
+            case ".png":
+            case ".jpg":
+            case ".jpeg":
+            case ".iso": return @<i class="far fa-file-image fa-lg" style="color: rgb(21, 170, 191);"></i>;
+
+            default: return @<i class="far fa-file fa-lg"></i>;
+        }
+    }
+
 }

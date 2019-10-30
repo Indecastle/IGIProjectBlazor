@@ -132,7 +132,7 @@ namespace BlazorApp2
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            notifier.Cycle();
+            //notifier.Cycle();
         }
     }
 }

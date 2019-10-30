@@ -11,7 +11,7 @@ namespace BlazorApp2.Data
     {
         Task CreateBucketAsync(string bucketname);
         Task UploadBucketAsync(Stream stream, string username, string filename);
-        Task<IEnumerable<S3Object>> ListFilesAsync(string username, string dirpath);
+        Task<IEnumerable<S3Object>> ListFilesAsync(string dirpath);
         string GeneratePreSignedURL(string filepath);
     }
 }

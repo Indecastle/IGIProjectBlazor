@@ -1,0 +1,27 @@
+﻿@page "/Mat/MatListItem"
+@using Microsoft.AspNetCore.Components
+
+<p>
+    <MatButton Label="Menu" OnClick="@OnClick" RefBack="@buttonForwardRef"></MatButton>
+    <MatMenu @ref="Menu" TargetForwardRef="@buttonForwardRef">
+        <MatList>
+            <MatListItem>Item 1</MatListItem>
+            <MatListItem>Item 2</MatListItem>
+            <MatListItem>Item 3</MatListItem>
+            <MatListItem>Item 4</MatListItem>
+            <MatListItem>Item 5</MatListItem>
+        </MatList>
+    </MatMenu>
+</p>
+
+@code
+        {
+    ForwardRef buttonForwardRef = new ForwardRef();
+    BaseMatMenu Menu;
+
+    public void OnClick(MouseEventArgs e)
+    {
+        this.Menu.OpenAsync();
+    }
+
+}
