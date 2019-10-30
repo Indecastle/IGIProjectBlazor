@@ -3,7 +3,7 @@
 @using System.IO;
 
 <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
-<button @onclick="@(() => StateHasChanged())"></button>
+<button @onclick="@(() => StateHasChanged())" hidden></button>
 <table class="table table-striped">
     <thead>
         <tr class="blazor-grid-header">
@@ -13,8 +13,8 @@
             <th>Owner</th>
         </tr>
     </thead>
-    <tbody>
-        @if (Dir == null)
+    <tbody @key="ItemList">
+        @if (Dir == null || Dir.IsUpdating)
         {
             <p><em>Loading...</em></p>
         }
@@ -46,6 +46,20 @@
                     </tr>
                 }
             }
+            int count2 = PageSize - ItemList.Count();
+            if(count2 > 0)
+            {
+                @for(int i = 0; i < count2; i++)
+                {
+                    <tr class="blazor-row-item" style="height: 49px;">
+                        <td scope="col" class=""></td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                        <td scope="col"></td>
+                    </tr>
+                }
+            }
+
         }
 
     </tbody>
@@ -128,15 +142,20 @@
 
     public async Task GoToSubDir(S3DirObject obj)
     {
+        Dir.IsUpdating = true;
         var S3ListFiles = await _is3.ListFilesAsync(obj.FullPathName);
         Dir.SubDir(S3ListFiles, obj);
+        Dir.IsUpdating = false;
         updateList(curPage);
+        StateHasChanged();
     }
 
     public async Task GoToBackDir()
     {
+        Dir.IsUpdating = true;
         var S3ListFiles = await _is3.ListFilesAsync(Dir.BackDirPath);
         Dir.BackDir(S3ListFiles);
+        Dir.IsUpdating = false;
         updateList(curPage);
     }
 
@@ -148,9 +167,19 @@
         await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
     }
 
+    protected override bool ShouldRender()
+    {
+        bool renderUI = !Dir.IsUpdating;
 
+        return renderUI;
+    }
 
-
+    public void azaza()
+    {
+        Dir.IsUpdating = true;
+        StateHasChanged();
+        Dir.IsUpdating = false;
+    }
 
 
     public void updateList(int currentPage)
@@ -160,7 +189,7 @@
 
         ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
         curPage = currentPage;
-        this.StateHasChanged();
+        //this.StateHasChanged();
     }
 
     public void SetPagerSize(string direction)

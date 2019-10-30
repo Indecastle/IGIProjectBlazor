@@ -122,6 +122,7 @@ namespace BlazorApp2.Data
 
     public class S3Dir
     {
+        public bool IsUpdating = false;
         public string UserName { get; private set; }
         public int Level { get; private set; }
         public S3DirObject CurrentDir { get; private set; }
@@ -178,23 +179,23 @@ namespace BlazorApp2.Data
             foreach (var s in diststrs)
             {
                 string[] ar2 = s.Key.Split('/');
-                if (ar2.Length - 1 == Level)
-
-                    S3Objs.Add(new S3FileObject
-                    {
-                        Name = ar2[Level],
-                        DirPath = CurrentDir.FullPathName,
-                        FullPathName = s.Key,
-                        Owner = s.Owner,
-                        Size = s.Size,
-                        LastModified = s.LastModified
-                    });
-                else
-                    SubDirs.Add(new S3DirObject
-                    {
-                        FullPathName = String.Join("/", ar2.Take(Level+1)),
-                        Name = ar2[Level]
-                    });
+                if (ar2[Level] != "")
+                    if (ar2.Length - 1 == Level)
+                        S3Objs.Add(new S3FileObject
+                        {
+                            Name = ar2[Level],
+                            DirPath = CurrentDir.FullPathName,
+                            FullPathName = s.Key,
+                            Owner = s.Owner,
+                            Size = s.Size,
+                            LastModified = s.LastModified
+                        });
+                    else
+                        SubDirs.Add(new S3DirObject
+                        {
+                            FullPathName = String.Join("/", ar2.Take(Level + 1)),
+                            Name = ar2[Level]
+                        });
             }
         }
 
@@ -227,7 +228,7 @@ namespace BlazorApp2.Data
             {
                 OldDir = DirStack.Peek();
             }
-                
+
         }
     }
 
