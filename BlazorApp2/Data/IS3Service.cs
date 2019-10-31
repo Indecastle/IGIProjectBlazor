@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorApp2.Data
 {
-    interface IS3Service
+    public interface IS3Service
     {
         Task CreateBucketAsync(string bucketname);
         Task CreateUserAsync(string username);

@@ -5,7 +5,7 @@
 
     <ContextMenu Id="myMenu">
         <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
-        <Item OnClick="@DeleteFileOrFolder"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
+        <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
         <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
         <Seperator />
         <Item>
@@ -19,7 +19,7 @@
 
 
 <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
-<button @onclick="@(() => StateHasChanged())" hidden></button>
+<button @onclick="@(() => StateHasChanged())"></button>
 <table class="table table-striped">
     <thead>
         <tr class="blazor-grid-header">
@@ -29,7 +29,7 @@
             <th>Owner</th>
         </tr>
     </thead>
-    <tbody @key="ItemList">
+    <tbody>
         @if (Dir == null || Dir.IsUpdating)
         {
             <p><em>Loading...</em></p>
@@ -130,7 +130,8 @@
         [Parameter]
         public int PageSize { get; set; }
 
-        IEnumerable<IS3Object> ItemList { get; set; }
+        [Parameter]
+        public IEnumerable<IS3Object> ItemList { get; set; }
         //IEnumerable<S3FileObject> Items { get; set; }
 
         public S3Dir Dir { get; set; }
@@ -157,8 +158,9 @@
             {
                 string userName = await GetUserName();
                 await _is3.CreateUserAsync(userName);
-                var S3ListFiles = await _is3.ListFilesAsync(userName);
-                Dir = new S3Dir(S3ListFiles, userName);
+                Console.WriteLine("############ STEP #1");
+                Dir = new S3Dir(_is3, userName);
+                await Dir.UpdateDir();
                 Console.WriteLine("############ IS AUTHED");
             }
             else
@@ -170,8 +172,7 @@
         public async Task GoToSubDir(S3DirObject obj)
         {
             Dir.IsUpdating = true;
-            var S3ListFiles = await _is3.ListFilesAsync(obj.FullPathName);
-            Dir.SubDir(S3ListFiles, obj);
+            await Dir.SubDir(obj);
             Dir.IsUpdating = false;
             updateList(curPage);
             StateHasChanged();
@@ -180,8 +181,7 @@
         public async Task GoToBackDir()
         {
             Dir.IsUpdating = true;
-            var S3ListFiles = await _is3.ListFilesAsync(Dir.BackDirPath);
-            Dir.BackDir(S3ListFiles);
+            await Dir.BackDir();
             Dir.IsUpdating = false;
             updateList(curPage);
         }
@@ -189,6 +189,9 @@
         public async Task DeleteFileOrFolder(ItemClickEventArgs e)
         {
             await _is3.DeleteFilesAsync(e.Data as IS3Object);
+            await Dir.UpdateDir();
+            curPage = 1;
+            updateList(curPage);
 
         }
 
@@ -204,14 +207,7 @@
         {
             bool renderUI = !Dir.IsUpdating;
 
-            return renderUI;
-        }
-
-        public void azaza()
-        {
-            Dir.IsUpdating = true;
-            StateHasChanged();
-            Dir.IsUpdating = false;
+            return true;
         }
 
 
@@ -222,7 +218,7 @@
 
             ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
             curPage = currentPage;
-            //this.StateHasChanged();
+            this.StateHasChanged();
         }
 
         public void SetPagerSize(string direction)

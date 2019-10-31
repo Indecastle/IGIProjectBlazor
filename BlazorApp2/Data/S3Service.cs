@@ -64,6 +64,7 @@ namespace BlazorApp2.Data
         public async Task DeleteFilesAsync(IS3Object obj)
         {
             var S3ListFiles = await ListFilesAsync(obj.FullPathName);
+
             var keysAndVersions = await PutObjectsAsync(S3ListFiles);
 
             DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest
@@ -126,14 +127,14 @@ namespace BlazorApp2.Data
             return keys;
         }
 
-        public async Task UploadBucketAsync(Stream stream, string username, string filename)
+        public async Task UploadBucketAsync(Stream stream, string dirpath, string filename)
         {
             try
             {
                 //var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 //var user = authState.User;
                 var fileTransferUtility = new TransferUtility(_client);
-                await fileTransferUtility.UploadAsync(stream, BucketName, username + "/" + filename);
+                await fileTransferUtility.UploadAsync(stream, BucketName, dirpath + "/" + filename);
             }
             catch (AmazonS3Exception e)
             {
@@ -152,7 +153,7 @@ namespace BlazorApp2.Data
             {
                 BucketName = BucketName,
                 MaxKeys = 1000,
-                //Prefix = $"{username}/{dirpath}"
+                Prefix = dirpath
             };
             ListObjectsV2Response response;
             do
@@ -202,6 +203,7 @@ namespace BlazorApp2.Data
 
     public class S3Dir
     {
+        public IS3Service _is3 { get; set; }
         public bool IsUpdating = false;
         public string UserName { get; private set; }
         public int Level { get; private set; }
@@ -219,8 +221,9 @@ namespace BlazorApp2.Data
         {
             S3Objs = new List<S3FileObject>();
         }
-        public S3Dir(IEnumerable<S3Object> s3objects, string userName)
+        public S3Dir(IS3Service service, string userName)
         {
+            _is3 = service;
             UserName = userName;
             //BackDirName = BackDirPath = "";
             //DirPath = DirName = userName;
@@ -236,16 +239,15 @@ namespace BlazorApp2.Data
                 Name = userName,
                 FullPathName = userName
             };
-
-            ToDir(s3objects);
         }
 
-        public void ToDir(IEnumerable<S3Object> s3objects)
+        public async Task UpdateDir()
         {
             SubDirs.Clear();
             S3Objs.Clear();
 
-            IEnumerable<S3Object> diststrs = s3objects.Where((s) =>
+            var S3ListFiles = await _is3.ListFilesAsync(CurrentDir.FullPathName);
+            IEnumerable<S3Object> diststrs = S3ListFiles.Where((s) =>
             {
                 if (s.Key.StartsWith(CurrentDir.FullPathName))
                     return true;
@@ -281,7 +283,7 @@ namespace BlazorApp2.Data
             }
         }
 
-        public void SubDir(IEnumerable<S3Object> s3objects, S3DirObject subobj)
+        public async Task SubDir(S3DirObject subobj)
         {
             Level++;
             IsRoot = (Level == 1);
@@ -289,17 +291,16 @@ namespace BlazorApp2.Data
             DirStack.Push(CurrentDir);
             CurrentDir = subobj;
 
-            ToDir(s3objects);
+            await UpdateDir();
         }
 
-        public void BackDir(IEnumerable<S3Object> s3objects)
+        public async Task BackDir()
         {
-
             if (!IsRoot)
             {
                 Level--;
                 CurrentDir = DirStack.Pop();
-                ToDir(s3objects);
+                await UpdateDir();
             }
             if (Level == 1) // IsRoot
             {
