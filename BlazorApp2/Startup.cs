@@ -99,6 +99,7 @@ namespace BlazorApp2
                 config.MaximumOpacity = 95;
                 config.VisibleStateDuration = 3000;
             });
+            services.AddBlazorContextMenu();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

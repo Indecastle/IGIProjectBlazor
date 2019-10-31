@@ -12,12 +12,13 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.100.1" />
-    <PackageReference Include="AWSSDK.S3" Version="3.3.105" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.105.1" />
+    <PackageReference Include="Blazor.ContextMenu" Version="1.2.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="2.1.1" />
     <PackageReference Include="BlazorInputFile" Version="0.1.0-preview-00002" />
     <PackageReference Include="EmbeddedBlazorContent" Version="1.10.0" />
     <PackageReference Include="MailKit" Version="2.3.1.6" />
-    <PackageReference Include="MatBlazor" Version="1.10.0" />
+    <PackageReference Include="MatBlazor" Version="1.10.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="3.1.0-preview1.19508.20" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.0-preview1.19508.20" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.0-preview1.19508.20" />

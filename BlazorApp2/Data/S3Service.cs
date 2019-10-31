@@ -44,8 +44,88 @@ namespace BlazorApp2.Data
             {
                 Console.WriteLine(e);
             }
+        }
+
+        public async Task CreateUserAsync(string username)
+        {
+            string tempPath = username + "/";
+            var fileTransferUtility = new TransferUtility(_client);
+            await fileTransferUtility.UploadAsync(new MemoryStream(), BucketName, tempPath);
+
+            //var deleteObjectRequest = new DeleteObjectRequest
+            //{
+            //    BucketName = BucketName,
+            //    Key = tempPath
+            //};
+            //await _client.DeleteObjectAsync(deleteObjectRequest);
 
         }
+
+        public async Task DeleteFilesAsync(IS3Object obj)
+        {
+            var S3ListFiles = await ListFilesAsync(obj.FullPathName);
+            var keysAndVersions = await PutObjectsAsync(S3ListFiles);
+
+            DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = BucketName,
+                Objects = keysAndVersions // This includes the object keys and null version IDs.
+            };
+            // You can add specific object key to the delete request using the .AddKey.
+            // multiObjectDeleteRequest.AddKey("TickerReference.csv", null);
+            try
+            {
+                DeleteObjectsResponse response = await _client.DeleteObjectsAsync(multiObjectDeleteRequest);
+                Console.WriteLine("Successfully deleted all the {0} items", response.DeletedObjects.Count);
+            }
+            catch (DeleteObjectsException e)
+            {
+                PrintDeletionErrorStatus(e);
+            }
+        }
+
+        private static void PrintDeletionErrorStatus(DeleteObjectsException e)
+        {
+            // var errorResponse = e.ErrorResponse;
+            DeleteObjectsResponse errorResponse = e.Response;
+            Console.WriteLine("x {0}", errorResponse.DeletedObjects.Count);
+
+            Console.WriteLine("No. of objects successfully deleted = {0}", errorResponse.DeletedObjects.Count);
+            Console.WriteLine("No. of objects failed to delete = {0}", errorResponse.DeleteErrors.Count);
+
+            Console.WriteLine("Printing error data...");
+            foreach (DeleteError deleteError in errorResponse.DeleteErrors)
+            {
+                Console.WriteLine("Object Key: {0}\t{1}\t{2}", deleteError.Key, deleteError.Code, deleteError.Message);
+            }
+        }
+
+        private async Task<List<KeyVersion>> PutObjectsAsync(IEnumerable<S3Object> objes)
+        {
+            var keys = new List<KeyVersion>();
+
+            foreach(var obj in objes)
+            {
+                PutObjectRequest request = new PutObjectRequest
+                {
+                    BucketName = BucketName,
+                    Key = obj.Key,
+                    //ContentBody = "This is the content body!",
+
+                };
+
+                var response = await _client.PutObjectAsync(request);
+                KeyVersion keyVersion = new KeyVersion
+                {
+                    Key = obj.Key,
+                    VersionId = response.VersionId
+                };
+
+                keys.Add(keyVersion);
+            }
+            return keys;
+        }
+
         public async Task UploadBucketAsync(Stream stream, string username, string filename)
         {
             try
@@ -188,7 +268,9 @@ namespace BlazorApp2.Data
                             FullPathName = s.Key,
                             Owner = s.Owner,
                             Size = s.Size,
-                            LastModified = s.LastModified
+                            LastModified = s.LastModified,
+                            ETag = s.ETag,
+                            StorageClass = s.StorageClass.Value
                         });
                     else
                         SubDirs.Add(new S3DirObject
@@ -240,6 +322,8 @@ namespace BlazorApp2.Data
         public long Size { get; set; }
         public Owner Owner { get; set; }
         public DateTime LastModified { get; set; }
+        public string ETag { get; set; }
+        public string StorageClass { get; set; }
     }
 
     public class S3DirObject : IS3Object
@@ -250,6 +334,7 @@ namespace BlazorApp2.Data
 
     public interface IS3Object
     {
+        string FullPathName { get; set; }
     }
 
     public static class EnumerableExtensions
