@@ -1,65 +1,85 @@
 ﻿@inject IS3Service _is3;
 @inject IJSRuntime JsRuntime;
+@inject IMatToaster Toaster
 @using System.IO;
 
 
-    <ContextMenu Id="myMenu">
-        <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
-        <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
-        <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
-        <Seperator />
-        <Item>
-            Submenu
-            <SubMenu>
-                <Item OnClick="@OnClick">Submenu Item 1</Item>
-                <Item OnClick="@OnClick">Submenu Item 2</Item>
-            </SubMenu>
-        </Item>
-    </ContextMenu>
+<ContextMenu Id="myMenu" AutoHide="true">
+    <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
+    <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
+    <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
+    <Seperator />
+    <Item>
+        Submenu
+        <SubMenu>
+            <Item OnClick="@OnClick">Submenu Item 1</Item>
+            <Item OnClick="@OnClick">Submenu Item 2</Item>
+        </SubMenu>
+    </Item>
+</ContextMenu>
+
+<ContextMenu Id="myBackmenu" AutoHide="true">
+    <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus"></i> Add Folder </Item>
+    <Item OnClick="@OnClick"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
+</ContextMenu>
+
+<MatDialog @bind-IsOpen="@dialogIsOpen" CanBeClosed="false" to>
+    <MatDialogTitle>Create Folder</MatDialogTitle>
+    <MatDialogContent>
+        <p>What's your new folder name?</p>
+        <MatTextField @bind-Value="@dialogTextField" Label="Name folder"></MatTextField>
+    </MatDialogContent>
+    <MatDialogActions>
+        <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
+        <MatButton OnClick="@CreateFolder">OK</MatButton>
+    </MatDialogActions>
+</MatDialog>
+
 
 
 <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
-<button @onclick="@(() => StateHasChanged())"></button>
-<table class="table table-striped">
-    <thead>
-        <tr class="blazor-grid-header">
-            <th>Name</th>
-            <th>Size</th>
-            <th>LastModified</th>
-            <th>Owner</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Dir == null || Dir.IsUpdating)
-        {
-            <p><em>Loading...</em></p>
-        }
-        else
-        {
-            @foreach (var item in ItemList)
-            {
-                if ((item as S3DirObject) != null)
-                {
-                    var dirobj = item as S3DirObject;
-                    <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item" Data="item">
-                        <td scope="col" @ondblclick="@(async () => await GoToSubDir(dirobj))"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                    </ContextMenuTrigger>
-
-
+<button @onclick="@(() => StateHasChanged())">Update</button>
+<InputFile OnChange="HandleSelection" />
+<div class="root__content">
+    <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white">
+        <div>
+            <table class="table table-striped" @key="ItemList">
+                <thead>
+                    <tr class="blazor">
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>LastModified</th>
+                        <th>Owner</th>
+                        <th>ETag</th>
+                        <th>StorageClass</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Dir == null || Dir.IsUpdating)
+                    {
+                        <p><em>Loading...</em></p>
+                    }
+                    else
+                    {
+                        @foreach (var item in ItemList)
+                        {
+                            if ((item as S3DirObject) != null)
+                            {
+                                var dirobj = item as S3DirObject;
+                                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item myrowstyle stopprop" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))">
+                            <td scope="col"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
+                            <td scope="col"></td>
+                            <td scope="col"></td>
+                            <td scope="col"></td>
+                            <td scope="col"></td>
+                            <td scope="col"></td>
+                </ContextMenuTrigger>
             }
             else
             {
                 var fileobj = item as S3FileObject;
-                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item" Data="item">
-                    <td scope="col" @ondblclick="@(async () => await GetGenUrl(fileobj))">
-                        @GetIcon(fileobj)
-                        @fileobj.Name
-                    </td>
+                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item stopprop" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))">
+                    <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
                     <td scope="col">@fileobj.Size</td>
                     <td scope="col">@fileobj.LastModified</td>
                     <td scope="col">@fileobj.Owner</td>
@@ -68,219 +88,288 @@
                 </ContextMenuTrigger>
             }
         }
-            int count2 = PageSize - ItemList.Count();
-            if (count2 > 0)
-            {
-                @for (int i = 0; i < count2; i++)
-                {
-                    <tr class="blazor-row-item" style="height: 49px;">
-                        <td scope="col" class=""></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                        <td scope="col"></td>
-                    </tr>
-                }
-            }
-        }
-        </tbody>
-    </table>
+                        int count2 = PageSize - ItemList.Count();
+                        if (count2 > 0)
+                        {
+                            @for (int i = 0; i < count2; i++)
+                            {
+                                <tr class="blazor-row-item" style="height: 49px;">
+                                    <td scope="col" class=""></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                </tr>
+                            }
+                        }
+                    }
+                    </tbody>
+                    </table>
+                </div>
+                </ContextMenuTrigger>
+                </div>
 
-    <ul class="pagination">
-        <li class="page-item">
-            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("back"))>&laquo</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("previous"))>Prev</a>
-        </li>
-        @for (int i = startPage; i <= endPage; i++)
+                <ul class="pagination" style="padding: 10px 0px 0px 30px;">
+                    <li class="page-item">
+                        <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("back"))>&laquo</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("previous"))>Prev</a>
+                    </li>
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        var currentPage = i;
+                        <li class="page-item @(currentPage==curPage?"active":"")" aria-current="page">
+                            <a class="page-link" @onclick=@(async () => updateList(currentPage))> @currentPage <span class="sr-only">(current)</span></a>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("next"))>Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("forward"))>&raquo;</a>
+                    </li>
+                    <span class="pagebutton btn btn-link disabled">Page @curPage of @totalPages</span>
+                </ul>
+
+@code {
+    bool dialogIsOpen = false;
+    string dialogTextField = null;
+
+    void OnClick(ItemClickEventArgs e)
+    {
+        Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
+    }
+    public void ShowToast(MatToastType type, string message, string title = null, string icon = "")
+    {
+        Toaster.Add(message, type, title, icon);
+    }
+
+    int totalPages;
+    int curPage;
+    int pagerSize;
+    int startPage;
+    int endPage;
+
+    [Parameter]
+    public Func<Task<string>> GetUserName { get; set; }
+    [Parameter]
+    public Func<Task<bool>> GetIsAuth { get; set; }
+
+    [Parameter]
+    public int PageSize { get; set; }
+
+    [Parameter]
+    public IEnumerable<IS3Object> ItemList { get; set; }
+    //IEnumerable<S3FileObject> Items { get; set; }
+
+    public S3Dir Dir { get; set; }
+    public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        pagerSize = 5;
+        curPage = 1;
+
+        await GetListFiles();
+        ItemList = Dir.SubDirs;
+        ItemList = ItemList.Concat(Dir.S3Objs);
+
+        ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
+        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+
+        SetPagerSize("forward");
+    }
+
+    protected override bool ShouldRender()
+    {
+        bool renderUI = !Dir.IsUpdating;
+
+        return true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || true)
         {
-            var currentPage = i;
-            <li class="page-item @(currentPage==curPage?"active":"")" aria-current="page">
-                <a class="page-link" @onclick=@(async () => updateList(currentPage))> @currentPage <span class="sr-only">(current)</span></a>
-            </li>
+            await JsRuntime.InvokeAsync<object>("onafterrender");
         }
-        <li class="page-item">
-            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("next"))>Next</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("forward"))>&raquo;</a>
-        </li>
-        <span class="pagebutton btn btn-link disabled">Page @curPage of @totalPages</span>
-    </ul>
+        //await JsRuntime.InvokeAsync<object>("console.log", "onAfterRender");
+    }
 
-    @code {
-        void OnClick(ItemClickEventArgs e)
+
+
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file != null)
         {
-            Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
-        }
-        int totalPages;
-        int curPage;
-        int pagerSize;
-
-        int startPage;
-        int endPage;
-
-        [Parameter]
-        public Func<Task<string>> GetUserName { get; set; }
-        [Parameter]
-        public Func<Task<bool>> GetIsAuth { get; set; }
-
-        [Parameter]
-        public int PageSize { get; set; }
-
-        [Parameter]
-        public IEnumerable<IS3Object> ItemList { get; set; }
-        //IEnumerable<S3FileObject> Items { get; set; }
-
-        public S3Dir Dir { get; set; }
-        public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
-
-        protected override async Task OnInitializedAsync()
-        {
-            pagerSize = 5;
-            curPage = 1;
-
-            await GetListFiles();
-            ItemList = Dir.SubDirs;
-            ItemList = ItemList.Concat(Dir.S3Objs);
-
-            ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
-            totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
-
-            SetPagerSize("forward");
-        }
-
-        public async Task GetListFiles()
-        {
-            if (await GetIsAuth())
-            {
-                string userName = await GetUserName();
-                await _is3.CreateUserAsync(userName);
-                Console.WriteLine("############ STEP #1");
-                Dir = new S3Dir(_is3, userName);
-                await Dir.UpdateDir();
-                Console.WriteLine("############ IS AUTHED");
-            }
-            else
-            {
-                Dir = new S3Dir();
-            }
-        }
-
-        public async Task GoToSubDir(S3DirObject obj)
-        {
-            Dir.IsUpdating = true;
-            await Dir.SubDir(obj);
-            Dir.IsUpdating = false;
-            updateList(curPage);
-            StateHasChanged();
-        }
-
-        public async Task GoToBackDir()
-        {
-            Dir.IsUpdating = true;
-            await Dir.BackDir();
-            Dir.IsUpdating = false;
-            updateList(curPage);
-        }
-
-        public async Task DeleteFileOrFolder(ItemClickEventArgs e)
-        {
-            await _is3.DeleteFilesAsync(e.Data as IS3Object);
+            // Just load into .NET memory to show it can be done
+            // Alternatively it could be saved to disk, or parsed in memory, or similar
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            await _is3.UploadObjectAsync(ms, Dir.CurrentDir.FullPathName + '/' + file.Name);
             await Dir.UpdateDir();
             curPage = 1;
             updateList(curPage);
-
+            ShowToast(MatToastType.Success, $"File \"{file.Name}\" is Added");
         }
+    }
+    
 
-        public async Task GetGenUrl(S3FileObject obj)
+
+    public async Task GetListFiles()
+    {
+        if (true || await GetIsAuth())
         {
-            string url = _is3.GeneratePreSignedURL(obj.FullPathName);
-            //NavigationManager.NavigateTo(url, false);
-            //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
-            await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
+            string userName = await GetUserName();
+            await _is3.CreateUserAsync(userName);
+            Console.WriteLine("############ STEP #1");
+            Dir = new S3Dir(_is3, userName);
+            await Dir.UpdateDir();
+            Console.WriteLine("############ IS AUTHED");
         }
-
-        protected override bool ShouldRender()
+        else
         {
-            bool renderUI = !Dir.IsUpdating;
-
-            return true;
+            Dir = new S3Dir();
         }
+    }
 
+    public async Task GoToSubDir(S3DirObject obj)
+    {
+        Dir.IsUpdating = true;
+        await Dir.SubDir(obj);
+        Dir.IsUpdating = false;
+        updateList(curPage);
+        StateHasChanged();
+    }
 
-        public void updateList(int currentPage)
+    public async Task GoToBackDir()
+    {
+        Dir.IsUpdating = true;
+        await Dir.BackDir();
+        Dir.IsUpdating = false;
+        updateList(curPage);
+    }
+
+    public async Task DeleteFileOrFolder(ItemClickEventArgs e)
+    {
+        await Task.Run(async () =>
         {
-            ItemList = Dir.SubDirs;
-            ItemList = ItemList.Concat(Dir.S3Objs);
+            await _is3.DeleteFilesAsync(e.Data as IS3Object);
+            await Dir.UpdateDir();
+        });
 
-            ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
-            curPage = currentPage;
+        curPage = 1;
+        updateList(curPage);
+        ShowToast(MatToastType.Success, (e.Data is S3DirObject ? "Folder " : "File \"") + ((IS3Object)e.Data)?.Name + "\" deleted" );
+    }
+
+    public async Task CreateFolder(MouseEventArgs e)
+    {
+        dialogIsOpen = false;
+        await Dir.CreateFolder(dialogTextField);
+        await Dir.UpdateDir();
+        curPage = 1;
+        updateList(curPage);
+        ShowToast(MatToastType.Success, $"Folder \"{dialogTextField}\" is Added" );
+        dialogTextField = string.Empty;
+    }
+
+    public async Task GetGenUrl(S3FileObject obj)
+    {
+        string url = _is3.GeneratePreSignedURL(obj.FullPathName);
+        //NavigationManager.NavigateTo(url, false);
+        //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
+        await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
+    }
+
+
+
+
+
+
+
+
+
+    public void updateList(int currentPage)
+    {
+        ItemList = Dir.SubDirs;
+        ItemList = ItemList.Concat(Dir.S3Objs);
+
+        ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
+        curPage = currentPage;
+        this.StateHasChanged();
+    }
+
+    public void SetPagerSize(string direction)
+    {
+        if (direction == "forward" && endPage < totalPages)
+        {
+            startPage = endPage + 1;
+            if (endPage + pagerSize < totalPages)
+            {
+                endPage = startPage + pagerSize - 1;
+            }
+            else
+            {
+                endPage = totalPages;
+            }
             this.StateHasChanged();
         }
-
-        public void SetPagerSize(string direction)
+        else if (direction == "back" && startPage > 1)
         {
-            if (direction == "forward" && endPage < totalPages)
+            endPage = startPage - 1;
+            startPage = startPage - pagerSize;
+        }
+    }
+
+    public void NavigateToPage(string direction)
+    {
+        if (direction == "next")
+        {
+            if (curPage < totalPages)
             {
-                startPage = endPage + 1;
-                if (endPage + pagerSize < totalPages)
+                if (curPage == endPage)
                 {
-                    endPage = startPage + pagerSize - 1;
+                    SetPagerSize("forward");
                 }
-                else
-                {
-                    endPage = totalPages;
-                }
-                this.StateHasChanged();
+                curPage += 1;
             }
-            else if (direction == "back" && startPage > 1)
+        }
+        else if (direction == "previous")
+        {
+            if (curPage > 1)
             {
-                endPage = startPage - 1;
-                startPage = startPage - pagerSize;
+                if (curPage == startPage)
+                {
+                    SetPagerSize("back");
+                }
+                curPage -= 1;
             }
         }
 
-        public void NavigateToPage(string direction)
+        updateList(curPage);
+    }
+
+
+
+
+
+
+
+    public RenderFragment GetIcon(S3FileObject obj)
+    {
+        string ext = Path.GetExtension(obj.Name);
+        switch (ext)
         {
-            if (direction == "next")
-            {
-                if (curPage < totalPages)
-                {
-                    if (curPage == endPage)
-                    {
-                        SetPagerSize("forward");
-                    }
-                    curPage += 1;
-                }
-            }
-            else if (direction == "previous")
-            {
-                if (curPage > 1)
-                {
-                    if (curPage == startPage)
-                    {
-                        SetPagerSize("back");
-                    }
-                    curPage -= 1;
-                }
-            }
-
-            updateList(curPage);
-        }
-
-
-
-
-        public RenderFragment GetIcon(S3FileObject obj)
-        {
-            string ext = Path.GetExtension(obj.Name);
-            switch (ext)
-            {
-                case ".pdf":
-                    return@<i class="far fa-file-pdf fa-lg" style="color: rgb(234, 67, 53);"></i>;
+            case ".pdf":
+                return@<i class="far fa-file-pdf fa-lg" style="color: rgb(234, 67, 53);"></i>;
 
 case ".txt":
 case ".docx":
@@ -305,4 +394,4 @@ return @<i class="far fa-file fa-lg"></i>;
 }
 }
 
-    }
+}

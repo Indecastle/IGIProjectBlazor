@@ -9,22 +9,24 @@
 
 <AuthorizeView>
     <Authorized>
-        <AmazonGrid PageSize="10" GetUserName="GetUserName" GetIsAuth="GetIsAuth"/>
+        <MatThemeProvider Theme="@theme1">
+            <AmazonGrid PageSize="10" GetUserName="GetUserName" GetIsAuth="GetIsAuth" />
+        </MatThemeProvider>
             @*
-                <MyBlazorGrid Items="@S3ListFiles" PageSize="10" Context="S3file" OnClickRow="GetGenUrl">
-                    <GridHeader>
-                        <th>Name</th>
-                        <th>Size</th>
-                        <th>LastModified</th>
-                        <th>Owner</th>
-                    </GridHeader>
-                    <GridRow>
-                        <td scope="col">@S3file.Key</td>
-                        <td scope="col">@S3file.Size</td>
-                        <td scope="col">@S3file.LastModified</td>
-                        <td scope="col">@S3file.Owner</td>
-                    </GridRow>
-                </MyBlazorGrid>
+            <MyBlazorGrid Items="@S3ListFiles" PageSize="10" Context="S3file" OnClickRow="GetGenUrl">
+                <GridHeader>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>LastModified</th>
+                    <th>Owner</th>
+                </GridHeader>
+                <GridRow>
+                    <td scope="col">@S3file.Key</td>
+                    <td scope="col">@S3file.Size</td>
+                    <td scope="col">@S3file.LastModified</td>
+                    <td scope="col">@S3file.Owner</td>
+                </GridRow>
+            </MyBlazorGrid>
             *@
 
     </Authorized>
@@ -53,4 +55,10 @@
         var user = authState.User;
         return user.Identity.Name;
     }
+
+    MatTheme theme1 = new MatTheme()
+            {
+                Primary = MatThemeColors.Orange._500.Value,
+                Secondary = MatThemeColors.LightGreen._500.Value
+            };
 }

@@ -63,7 +63,7 @@
         Console.WriteLine("start@@@@@@@@@@@@@@@@@@@");
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        await _is3.UploadBucketAsync(ms, user.Identity.Name, file.Name);
+        await _is3.UploadObjectAsync(ms, user.Identity.Name +'/'+ file.Name);
         Console.WriteLine("end@@@@@@@@@@@@@@@@@@@");
     }
 }

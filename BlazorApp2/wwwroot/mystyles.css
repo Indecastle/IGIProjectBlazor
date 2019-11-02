@@ -1,0 +1,30 @@
+﻿.root__content {
+    padding: 10px 50px 0 0px;
+}
+
+.root__content-inner_white {
+    padding: 32px;
+    background: rgb(250,250,250);
+    border-radius: 20px;
+    box-shadow: 0 1px 5px rgba(0,0,0,.2);
+    /*pointer-events: unset !important;*/
+}
+.mytable {
+    
+}
+
+.stopprop {
+}
+
+.myrowstyle {
+    /*pointer-events: initial;*/
+    cursor: help;
+}
+
+body {
+    font: .9376em/1.4667em yandex-sans,Arial,sans-serif;
+}
+
+div {
+    display: block;
+}
