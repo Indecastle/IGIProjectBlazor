@@ -4,7 +4,7 @@
 @using System.IO;
 
 
-<ContextMenu Id="myMenu" AutoHide="true">
+<ContextMenu Id="myMenu" AutoHide="true" Animation="Animation.Grow">
     <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
     <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
     <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
@@ -18,7 +18,7 @@
     </Item>
 </ContextMenu>
 
-<ContextMenu Id="myBackmenu" AutoHide="true">
+<ContextMenu Id="myBackmenu" AutoHide="true" Animation="Animation.Grow">
     <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>
     <Item OnClick="@OnClick"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
 </ContextMenu>
@@ -44,7 +44,7 @@
     <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white">
         <p>Item : @selectedItem?.Name</p>
         <div>
-            <table class="table table-borderless">
+            <table class="table table-borderless" @key="ItemList">
                 <thead>
                     <tr class="blazor">
                         <th>Name</th>
@@ -58,7 +58,18 @@
                 <tbody>
                     @if (Dir == null || Dir.IsUpdating)
                     {
-                        <p><em>Loading...</em></p>
+                        //<p><em>Loading...</em></p>
+						@for (int i = 0; i < PageSize; i++)
+						{
+							<tr class="blazor-row-item" style="height: 46px;">
+								<td scope="col"></td>
+								<td scope="col"></td>
+								<td scope="col"></td>
+								<td scope="col"></td>
+								<td scope="col"></td>
+								<td scope="col"></td>
+							</tr>
+						}
                     }
                     else
                     {
@@ -95,8 +106,8 @@
                         {
                             @for (int i = 0; i < count2; i++)
                             {
-                                <tr class="blazor-row-item" style="height: 49px;">
-                                    <td scope="col" class=""></td>
+                                <tr class="blazor-row-item" style="height: 46px;">
+                                    <td scope="col"></td>
                                     <td scope="col"></td>
                                     <td scope="col"></td>
                                     <td scope="col"></td>
@@ -181,9 +192,8 @@
         await GetListFiles();
         ItemList = Dir.SubDirs;
         ItemList = ItemList.Concat(Dir.S3Objs);
-
+		totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
         ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
-        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
 
         SetPagerSize("forward");
     }
@@ -301,13 +311,18 @@
 
     public void updateList(int currentPage)
     {
+		curPage = currentPage;
+		startPage = endPage = 0;
+		
         ItemList = Dir.SubDirs;
         ItemList = ItemList.Concat(Dir.S3Objs);
-
-        ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
-        curPage = currentPage;
+		totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+        ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
+		
+		SetPagerSize("forward");
         selectedItem = null;
         this.StateHasChanged();
+		
     }
 
     public void SetPagerSize(string direction)
