@@ -1,5 +1,5 @@
 ﻿.root__content {
-    padding: 10px 50px 0 0px;
+    padding: 10px 30px 0 30px;
 }
 
 .root__content-inner_white {
@@ -20,11 +20,20 @@
     /*pointer-events: initial;*/
     cursor: help;
 }
+.myrowstyle:hover {
+    /*pointer-events: initial;*/
+    cursor: help;
+    background-color: rgb(231, 231, 231);
+}
 
 body {
     font: .9376em/1.4667em yandex-sans,Arial,sans-serif;
 }
 
 div {
-    display: block;
+    /*display: block;*/
 }
+/*
+selected {
+    background-color: rgb(200, 200, 200) !important;
+}*/

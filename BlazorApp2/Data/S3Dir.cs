@@ -64,9 +64,7 @@ namespace BlazorApp2.Data
             var S3ListFiles = await _is3.ListFilesAsync(CurrentDir.FullPathName);
             IEnumerable<S3Object> diststrs = S3ListFiles.Where((s) =>
             {
-                if (s.Key.StartsWith(CurrentDir.FullPathName))
-                    return true;
-                return false;
+                return s.Key.StartsWith(CurrentDir.FullPathName);
             }).DistinctBy((s) =>
             {
                 string[] ar2 = s.Key.Split('/');

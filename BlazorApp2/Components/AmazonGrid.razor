@@ -19,7 +19,7 @@
 </ContextMenu>
 
 <ContextMenu Id="myBackmenu" AutoHide="true">
-    <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus"></i> Add Folder </Item>
+    <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>
     <Item OnClick="@OnClick"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
 </ContextMenu>
 
@@ -42,8 +42,9 @@
 <InputFile OnChange="HandleSelection" />
 <div class="root__content">
     <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white">
+        <p>Item : @selectedItem?.Name</p>
         <div>
-            <table class="table table-striped" @key="ItemList">
+            <table class="table table-borderless">
                 <thead>
                     <tr class="blazor">
                         <th>Name</th>
@@ -63,31 +64,32 @@
                     {
                         @foreach (var item in ItemList)
                         {
+                            string cssClass = "blazor-row-item myrowstyle stopprop" + (selectedItem == item ? "selected" : "");
                             if ((item as S3DirObject) != null)
                             {
                                 var dirobj = item as S3DirObject;
-                                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item myrowstyle stopprop" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))">
+                                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))" @onclick="(e => { selectedItem = item; })">
                             <td scope="col"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
                             <td scope="col"></td>
                             <td scope="col"></td>
                             <td scope="col"></td>
                             <td scope="col"></td>
                             <td scope="col"></td>
-                </ContextMenuTrigger>
-            }
-            else
-            {
-                var fileobj = item as S3FileObject;
-                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="blazor-row-item stopprop" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))">
-                    <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
-                    <td scope="col">@fileobj.Size</td>
-                    <td scope="col">@fileobj.LastModified</td>
-                    <td scope="col">@fileobj.Owner</td>
-                    <td scope="col">@fileobj.ETag</td>
-                    <td scope="col">@fileobj.StorageClass</td>
-                </ContextMenuTrigger>
-            }
-        }
+                                </ContextMenuTrigger>
+                            }
+                            else
+                            {
+                                var fileobj = item as S3FileObject;
+                                <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" @onclick="(e => { selectedItem = item; })">
+                                    <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
+                                    <td scope="col">@(fileobj.Size/1024) Kb</td>
+                                    <td scope="col">@fileobj.LastModified</td>
+                                    <td scope="col">@fileobj.Owner</td>
+                                    <td scope="col">@fileobj.ETag</td>
+                                    <td scope="col">@fileobj.StorageClass</td>
+                                </ContextMenuTrigger>
+                            }
+                        }
                         int count2 = PageSize - ItemList.Count();
                         if (count2 > 0)
                         {
@@ -166,6 +168,7 @@
 
     public S3Dir Dir { get; set; }
     public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
+    public IS3Object selectedItem;
 
 
 
@@ -246,7 +249,6 @@
         await Dir.SubDir(obj);
         Dir.IsUpdating = false;
         updateList(curPage);
-        StateHasChanged();
     }
 
     public async Task GoToBackDir()
@@ -304,6 +306,7 @@
 
         ItemList = ItemList.Skip((currentPage - 1) * PageSize).Take(PageSize);
         curPage = currentPage;
+        selectedItem = null;
         this.StateHasChanged();
     }
 

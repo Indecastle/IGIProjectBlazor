@@ -8,24 +8,24 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="@HideSideBar">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
+            <NavLink class="nav-link" href="counter" @onclick="@HideSideBar">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
+            <NavLink class="nav-link" href="fetchdata" @onclick="@HideSideBar">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
         </li>
         <AuthorizeView>
             <Authorized>
                 <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="ListFiles">
+                    <NavLink class="nav-link" href="ListFiles" @onclick="@HideSideBar">
                         <span class="oi oi-list-rich" aria-hidden="true"></span> List Files
                     </NavLink>
                 </li>
@@ -37,6 +37,17 @@
 
 @code {
     bool collapseNavMenu = true;
+
+    [Parameter]
+    public bool SideBar { get; set; }
+    [Parameter]
+    public EventCallback<bool> SideBarChanged { get; set; }
+
+    async Task HideSideBar()
+    {
+        SideBar = false;
+        await SideBarChanged.InvokeAsync(SideBar);
+    }
 
     string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
