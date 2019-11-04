@@ -1,16 +1,23 @@
-﻿.root__content {
+﻿.my_bodystyle {
+    padding: 5px 0px 0px 5px;
+    background-color: rgb(248,248,248);
+}
+
+
+.root__content {
     padding: 10px 30px 0 30px;
+    background-color: rgb(248,248,248);
 }
 
 .root__content-inner_white {
     padding: 32px;
-    background: rgb(250,250,250);
+    background: rgb(255,255,255);
     border-radius: 20px;
     box-shadow: 0 1px 5px rgba(0,0,0,.2);
     /*pointer-events: unset !important;*/
 }
+
 .mytable {
-    
 }
 
 .stopprop {
@@ -18,13 +25,12 @@
 
 .myrowstyle {
     /*pointer-events: initial;*/
-    cursor: help;
 }
-.myrowstyle:hover {
-    /*pointer-events: initial;*/
-    cursor: help;
-    background-color: rgb(231, 231, 231);
-}
+
+    .myrowstyle:hover {
+        /*pointer-events: initial;*/
+        background-color: rgb(231, 231, 231);
+    }
 
 body {
     font: .9376em/1.4667em yandex-sans,Arial,sans-serif;
@@ -37,3 +43,256 @@ div {
 selected {
     background-color: rgb(200, 200, 200) !important;
 }*/
+
+
+.my_root_content {
+    /*min-height: -webkit-calc(100vh - 60px);
+    min-height: calc(100vh - 60px);*/
+    padding: 10px 58px 0 250px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: rgb(248,248,248);
+}
+
+.my_sidebar_fixed {
+    position: fixed;
+    z-index: 1;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    background-color: rgb(248,248,248);
+}
+
+.my_sidebar__navigation {
+    overflow: hidden;
+    -webkit-flex: 1;
+    flex: 1;
+    padding-left: 32px;
+    margin-right: 32px;
+    position: relative;
+}
+
+.my_navigation__scroll {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.my_navigation__items_standard {
+    padding-top: 27px;
+}
+
+.my_info-space {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    margin: 0 22px 22px;
+}
+
+.my_sidebar__buttons {
+    padding: 15px 32px 10px 32px;
+    line-height: 0;
+}
+
+.my_upload-button__attach {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    bottom: 0;
+    height: 200%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.my_upload-button__attach-wrapper {
+    overflow: hidden;
+    position: absolute;
+    right: -20px;
+    left: -20px;
+    bottom: 0;
+    top: 0;
+}
+
+
+.my_contextmenu {
+    z-index: 1000 !important;
+}
+
+
+
+
+
+[type="file"] + label {
+    background: #f15d22;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-size: inherit;
+    font-weight: 600;
+    outline: none;
+    padding: 1rem 50px;
+    position: relative;
+    transition: all 0.3s;
+    text-align: center;
+    vertical-align: middle;
+    line-height: inherit;
+    box-shadow: -1px 1px 5px rgba(0,0,0,.2);
+}
+
+    [type="file"] + label:hover {
+        background-color: darken(#f15d22, 10%);
+    }
+
+    [type="file"] + label.my_btn-2 {
+        background-color: #fc0;
+        border-radius: 3px;
+        overflow: hidden;
+        height: 40px;
+        width: 100%;
+        font-size: 15px;
+        font-weight: 500;
+        color: #000;
+    }
+
+        [type="file"] + label.my_btn-2 span {
+            display: inline-block;
+            height: 100%;
+            transition: all 0.3s;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            font-size: 19px;
+            line-height: 0.4;
+        }
+
+        [type="file"] + label.my_btn-2::before {
+            color: #000;
+            font-family: 'Font Awesome 5 Free';
+            content: "\f382";
+            font-weight: 900;
+            font-size: 1.33333em;
+            height: 100%;
+            right: 130%;
+            line-height: 2;
+            position: absolute;
+            top: 0px;
+            transition: all 0.3s;
+        }
+
+        [type="file"] + label.my_btn-2:hover {
+            background-color: #f2c200;
+        }
+
+            [type="file"] + label.my_btn-2:hover::before {
+                right: 78%;
+            }
+
+
+
+    [type="file"] + label.my_btn-2_2 {
+        background-color: #fff;
+        border-radius: 3px;
+        overflow: hidden;
+        height: 40px;
+        width: 100%;
+        font-size: 15px;
+        font-weight: 500;
+        color: #000;
+    }
+
+        [type="file"] + label.my_btn-2_2 span {
+            display: inline-block;
+            height: 100%;
+            transition: all 0.3s;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            font-size: 19px;
+            line-height: 0.4;
+        }
+
+        [type="file"] + label.my_btn-2_2::before {
+            color: #000;
+            font-family: 'Font Awesome 5 Free';
+            content: "\f055";
+            font-weight: 900;
+            font-size: 1.33333em;
+            height: 100%;
+            right: 130%;
+            line-height: 2;
+            position: absolute;
+            top: 0px;
+            transition: all 0.3s;
+        }
+
+        [type="file"] + label.my_btn-2_2:hover {
+            background-color: rgb(245,245,245);
+        }
+
+            [type="file"] + label.my_btn-2_2:hover::before {
+                right: 78%;
+            }
+
+
+
+    [type="file"] + label.my_btn-3 {
+        background-color: #ee6d9e;
+        border-radius: 0;
+        overflow: hidden;
+        line-height: 40px;
+        height: 40px;
+        width: 100%;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+        [type="file"] + label.my_btn-3 span {
+            display: inline-block;
+            height: 100%;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        [type="file"] + label.my_btn-3::before {
+            color: #000;
+            font-family: 'Font Awesome 5 Free';
+            content: "\f382";
+            font-size: 130%;
+            height: 100%;
+            left: 44%;
+            line-height: 2.6;
+            position: absolute;
+            top: -180%;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        [type="file"] + label.my_btn-3:hover {
+            background-color: rgb(174,20,79);
+        }
+
+            [type="file"] + label.my_btn-3:hover span {
+                transform: translateY(300%);
+            }
+
+            [type="file"] + label.my_btn-3:hover::before {
+                top: 0;
+            }

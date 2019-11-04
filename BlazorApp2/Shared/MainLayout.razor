@@ -16,45 +16,54 @@
     </div>
 </app>*@
 
-<MatAppBarContainer>
-    <MatAppBar Fixed="true">
-        <MatAppBarRow>
-            <MatAppBarSection>
-                <MatIconButton Icon="menu" OnClick="@((e) => ButtonClicked())"></MatIconButton>
-                <MatAppBarTitle>MatBlazor - Material Design components for Blazor</MatAppBarTitle>
-            </MatAppBarSection>
-            <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+    <MatAppBarContainer>
+        <MatThemeProvider Theme="@theme1">
+            <MatAppBar Fixed="true">
+                <MatAppBarRow>
+                    <MatAppBarSection>
+                        <MatIconButton Icon="menu" OnClick="@((e) => ButtonClicked())"></MatIconButton>
+                        <MatAppBarTitle>MatBlazor - Material Design components for Blazor</MatAppBarTitle>
+                    </MatAppBarSection>
+                    <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                        <MatAppBarTitle><LoginDisplay /></MatAppBarTitle>
 
-                <LoginDisplay />
 
-                <MatIconButton Icon="favorite"></MatIconButton>
-            </MatAppBarSection>
-        </MatAppBarRow>
-    </MatAppBar>
+                        <MatIconButton Icon="favorite"></MatIconButton>
+                    </MatAppBarSection>
+                </MatAppBarRow>
+            </MatAppBar>
+        </MatThemeProvider>
 
-    <MatAppBarContent>
+            <MatAppBarContent>
 
-        <MatDrawerContainer >
-            <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal">
-                <div class="sidebar" style="width: 100%">
-                    <NavMenu @bind-SideBar="Opened"/>
-                </div>
-            </MatDrawer>
-            <MatDrawerContent Style="padding: 5px 0px 0px 5px;">
-                @Body
-            </MatDrawerContent>
-        </MatDrawerContainer>
+                <MatDrawerContainer>
+                    <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal" Style="z-index: 100;">
+                        <div class="sidebar" style="width: 100%">
+                            <NavMenu @bind-SideBar="Opened" />
+                        </div>
+                    </MatDrawer>
+                    <MatThemeProvider Theme="@theme1">
+                        <MatDrawerContent Class="my_bodystyle">
+                            @Body
+                        </MatDrawerContent>
+                    </MatThemeProvider>
+                </MatDrawerContainer>
 
-    </MatAppBarContent>
-</MatAppBarContainer>
+            </MatAppBarContent>
+    </MatAppBarContainer>
 
-@code
+        @code
 {
-    bool Opened = false;
+            bool Opened = false;
 
-    void ButtonClicked()
-    {
-        Opened = !Opened;
-    }
+            void ButtonClicked()
+            {
+                Opened = !Opened;
+            }
 
-}
+            MatTheme theme1 = new MatTheme()
+            {
+                Primary = "#4a148c",
+                Secondary = "#6a1b9a"
+            };
+        }

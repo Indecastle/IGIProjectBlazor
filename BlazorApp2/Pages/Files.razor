@@ -8,7 +8,8 @@
 
 <p>A multi-file picker that displays information about selection and shows progress as each one is loaded.</p>
 
-<InputFile multiple OnChange="files => selectedFiles = files" />
+<InputFile multiple OnChange="files => selectedFiles = files" @attributes="InputAttributes" />
+<label for="file" class="my_btn-2">upload</label>
 
 @if (selectedFiles != null)
 {
@@ -28,7 +29,7 @@
             <!-- Upload button -->
             <button @onclick="() => LoadFile(file)" disabled="@isLoading">
                 @if (!isLoading)
-                {
+                {   
                     <span>Load</span>
                 }
                 else
@@ -41,6 +42,14 @@
 }
 
 @code {
+    [Parameter]
+    public Dictionary<string, object> InputAttributes { get; set; } =
+        new Dictionary<string, object>()
+        {
+            { "hidden", "" },
+            { "id", "file"}
+        };
+
     IFileListEntry[] selectedFiles;
 
     protected override async Task OnInitializedAsync()
@@ -63,7 +72,7 @@
         Console.WriteLine("start@@@@@@@@@@@@@@@@@@@");
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        await _is3.UploadObjectAsync(ms, user.Identity.Name +'/'+ file.Name);
+        await _is3.UploadObjectAsync(ms, user.Identity.Name + '/' + file.Name);
         Console.WriteLine("end@@@@@@@@@@@@@@@@@@@");
     }
 }
