@@ -35,3 +35,7 @@ var $li = $('#menu li').click(function () {
     $li.removeClass('selected');
     $(this).addClass('selected');
 });
+
+function my_opendialog(id_name) {
+    document.getElementById(id_name).click();
+}

@@ -1,0 +1,24 @@
+﻿<h3>AmazonCreate</h3>
+
+
+<ContextMenu Id="idcc" AutoHide="true" Animation="Animation.Grow" CssClass="my_contextmenu">
+    <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
+    <Item OnClick="@OnClick"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
+    <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
+    <Seperator />
+    <Item>
+        Submenu
+        <SubMenu>
+            <Item OnClick="@OnClick">Submenu Item 1</Item>
+            <Item OnClick="@OnClick">Submenu Item 2</Item>
+        </SubMenu>
+    </Item>
+</ContextMenu>
+
+
+@code {
+    void OnClick(ItemClickEventArgs e)
+    {
+        Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
+    }
+}

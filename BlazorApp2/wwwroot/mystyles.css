@@ -21,6 +21,7 @@
 }
 
 .stopprop {
+    transition: all 0.3s
 }
 
 .myrowstyle {
@@ -39,10 +40,10 @@ body {
 div {
     /*display: block;*/
 }
-/*
-selected {
+
+.selected {
     background-color: rgb(200, 200, 200) !important;
-}*/
+}
 
 
 .my_root_content {

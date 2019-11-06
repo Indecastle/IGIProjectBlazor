@@ -20,7 +20,7 @@
 
 <ContextMenu Id="myBackmenu" AutoHide="true" Animation="Animation.Zoom" CssClass="my_contextmenu">
     <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>
-    <Item OnClick="@OnClick"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
+    <Item OnClick="@OpenDialog"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
 </ContextMenu>
 
 <MatDialog @bind-IsOpen="@dialogIsOpen" CanBeClosed="false" Class="my_contextmenu">
@@ -39,9 +39,8 @@
     <div class="my_sidebar_fixed">
         <div class="my_sidebar__buttons">
             <InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
-            <label for="idfile" class="my_btn-2"><span>Загрузить</span></label>
-            <InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
-            <label for="idfile" class="my_btn-2_2"><span>Создать</span></label>
+            <label for="idfile" class="my_btn my_btn-20"><span>Загрузить</span></label>
+            <label class="my_btn my_btn-20_2"><span>Создать</span></label>
 
         </div>
         <div class="my_sidebar__navigation">
@@ -62,7 +61,8 @@
                 <strong>Well done!</strong> Good Boy!
             </div>
             <div class="alert alert-info" role="alert">
-                <strong>XXX Link!</strong> Love Boy!
+                <strong>XXX Link!</strong> 
+                <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
             </div>
         </div>
     </div>
@@ -72,8 +72,16 @@
                 <div class="d-inline-block" style="padding-left: 50px;">
                     <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
                     <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
+                    @if (selectedItem is S3DirObject)
+                    {
+                        <span>Folder: @selectedItem?.Name</span>
+                    }
+                    else if (selectedItem is S3FileObject)
+                    {
+                        <span>File: @selectedItem?.Name</span>
+                    }
+                    
                 </div>
-                <p>Item : @selectedItem?.Name</p>
                 <div>
                     <table class="table table-borderless" @key="ItemList">
                         <thead>
@@ -106,7 +114,7 @@
                             {
                                 @foreach (var item in ItemList)
                                 {
-                                    string cssClass = "blazor-row-item myrowstyle stopprop" + (selectedItem == item ? "selected" : "");
+                                    string cssClass = "blazor-row-item myrowstyle stopprop " + (selectedItem == item ? "selected" : "");
                                     if ((item as S3DirObject) != null)
                                     {
                                         var dirobj = item as S3DirObject;
@@ -118,20 +126,20 @@
                                     <td scope="col"></td>
                                     <td scope="col"></td>
                         </ContextMenuTrigger>
-                    }
-                    else
-                    {
-                        var fileobj = item as S3FileObject;
-                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" @onclick="(e => { selectedItem = item; })">
-                            <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
-                            <td scope="col">@(fileobj.Size / 1024) Kb</td>
-                            <td scope="col">@fileobj.LastModified</td>
-                            <td scope="col">@fileobj.Owner</td>
-                            <td scope="col">@fileobj.ETag</td>
-                            <td scope="col">@fileobj.StorageClass</td>
-                        </ContextMenuTrigger>
-                    }
-                }
+                                    }
+                                    else
+                                    {
+                                        var fileobj = item as S3FileObject;
+                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" @onclick="(e => { selectedItem = item; })">
+                                            <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
+                                            <td scope="col">@(fileobj.Size / 1024) Kb</td>
+                                            <td scope="col">@fileobj.LastModified</td>
+                                            <td scope="col">@fileobj.Owner</td>
+                                            <td scope="col">@fileobj.ETag</td>
+                                            <td scope="col">@fileobj.StorageClass</td>
+                                        </ContextMenuTrigger>
+                                    }
+                                }
                                 int count2 = PageSize - ItemList.Count();
                                 if (count2 > 0)
                                 {
@@ -191,6 +199,10 @@
     void OnClick(ItemClickEventArgs e)
     {
         Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
+    }
+    async Task OpenDialog(ItemClickEventArgs e)
+    {
+        await JsRuntime.InvokeAsync<object>("my_opendialog", InputFileAttributes["id"]);
     }
     public void ShowToast(MatToastType type, string message, string title = null, string icon = "")
     {
@@ -296,6 +308,7 @@
         Dir.IsUpdating = true;
         await Dir.SubDir(obj);
         Dir.IsUpdating = false;
+        curPage = 1;
         updateList(curPage);
     }
 
@@ -304,6 +317,7 @@
         Dir.IsUpdating = true;
         await Dir.BackDir();
         Dir.IsUpdating = false;
+        curPage = 1;
         updateList(curPage);
     }
 
