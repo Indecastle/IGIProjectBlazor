@@ -5,8 +5,13 @@
         movie.item(i).addEventListener('contextmenu', function (e) {
             e.stopPropagation();
             //alert('div');
-            console.log("child1 clicked");
+            console.log("child1 contextmenu-clicked");
         }, false);
+        //movie.item(i).addEventListener('click', function (e) {
+        //    e.stopPropagation();
+        //    //alert('div');
+        //    console.log("child1 clicked");
+        //}, false);
     }
 
     /*var movie = document.getElementsByClassName("movieImg");

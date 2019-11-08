@@ -1,4 +1,15 @@
-﻿.my_bodystyle {
+﻿.myinlineblock {
+    display: inline !important;
+    padding-right: 10px;
+}
+.myendblock {
+    margin-left: auto;
+    align-items: center;
+}
+
+
+
+.my_bodystyle {
     padding: 5px 0px 0px 5px;
     background-color: rgb(248,248,248);
 }

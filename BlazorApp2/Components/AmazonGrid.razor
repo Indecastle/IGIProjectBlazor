@@ -46,13 +46,8 @@
         <div class="my_sidebar__navigation">
             <div class="my_navigation__scroll">
                 <div class="my_navigation__items_standard">
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
+                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
+                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>
                 </div>
             </div>
         </div>
@@ -67,20 +62,38 @@
         </div>
     </div>
     <div class="my_root_content">
-        <div class="root__content">
+        <div class="root__content" >
             <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white">
-                <div class="d-inline-block" style="padding-left: 50px;">
-                    <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
-                    <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
-                    @if (selectedItem is S3DirObject)
+                <div class="d-inline-flex" style="width: 100%;">
+                    <div class="d-inline-flex" style="padding-left: 20px;">
+                        <MatButton Disabled="@BackDisabled" OnClick="@GoToBackDir">Back</MatButton>
+                        <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
+                        @*@if (selectedItem is S3DirObject)
+                        {
+                            <span>Folder: @selectedItem?.Name</span>
+                        }
+                        else if (selectedItem is S3FileObject)
+                        {
+                            <span>File: @selectedItem?.Name</span>
+                        }*@
+                    </div>
+                    <div class="d-inline-flex" style="align-items: center;">
+                        @if (Dir != null)
+                        {
+                            @foreach (var folder in Dir.DirStack.Reverse())
+                            {
+                                <div class="myinlineblock">@folder.Name</div>
+                                <div class="myinlineblock"><i class="fas fa-chevron-right"></i></div>
+                            }
+                            <div class="myinlineblock">@Dir.CurrentDir.Name</div>
+                        }
+                    </div>
+                    @if (selectedItem != null)
                     {
-                        <span>Folder: @selectedItem?.Name</span>
+                        <div class="d-inline-flex myendblock">
+                            <i class="fas fa-chevron-circle-left"></i>
+                        </div>
                     }
-                    else if (selectedItem is S3FileObject)
-                    {
-                        <span>File: @selectedItem?.Name</span>
-                    }
-                    
                 </div>
                 <div>
                     <table class="table table-borderless" @key="ItemList">
@@ -89,9 +102,9 @@
                                 <th>Name</th>
                                 <th>Size</th>
                                 <th>LastModified</th>
-                                <th>Owner</th>
+                                @*<th>Owner</th>
                                 <th>ETag</th>
-                                <th>StorageClass</th>
+                                <th>StorageClass</th>*@
                             </tr>
                         </thead>
                         <tbody>
@@ -104,9 +117,9 @@
                                         <td scope="col"></td>
                                         <td scope="col"></td>
                                         <td scope="col"></td>
+                                        @*<td scope="col"></td>
                                         <td scope="col"></td>
-                                        <td scope="col"></td>
-                                        <td scope="col"></td>
+                                        <td scope="col"></td>*@
                                     </tr>
                                 }
                             }
@@ -118,25 +131,25 @@
                                     if ((item as S3DirObject) != null)
                                     {
                                         var dirobj = item as S3DirObject;
-                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))" @onclick="(e => { selectedItem = item; })">
-                                    <td scope="col"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
-                                    <td scope="col"></td>
-                                    <td scope="col"></td>
-                                    <td scope="col"></td>
-                                    <td scope="col"></td>
-                                    <td scope="col"></td>
-                        </ContextMenuTrigger>
+                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))" >
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })"></td>
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })"></td>
+                                            @*<td scope="col"></td>
+                                            <td scope="col"></td>
+                                            <td scope="col"></td>*@
+                                        </ContextMenuTrigger>
                                     }
                                     else
                                     {
                                         var fileobj = item as S3FileObject;
-                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" @onclick="(e => { selectedItem = item; })">
-                                            <td scope="col"> @GetIcon(fileobj) @fileobj.Name </td>
-                                            <td scope="col">@(fileobj.Size / 1024) Kb</td>
-                                            <td scope="col">@fileobj.LastModified</td>
-                                            <td scope="col">@fileobj.Owner</td>
+                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" >
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })"> @GetIcon(fileobj) @fileobj.Name </td>
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })">@(fileobj.Size / 1024) Kb</td>
+                                            <td scope="col" @onclick="(e => { selectedItem = item; })">@fileobj.LastModified</td>
+                                            @*<td scope="col">@fileobj.Owner</td>
                                             <td scope="col">@fileobj.ETag</td>
-                                            <td scope="col">@fileobj.StorageClass</td>
+                                            <td scope="col">@fileobj.StorageClass</td>*@
                                         </ContextMenuTrigger>
                                     }
                                 }
@@ -149,9 +162,9 @@
                                             <td scope="col"></td>
                                             <td scope="col"></td>
                                             <td scope="col"></td>
+                                            @*<td scope="col"></td>
                                             <td scope="col"></td>
-                                            <td scope="col"></td>
-                                            <td scope="col"></td>
+                                            <td scope="col"></td>*@
                                         </tr>
                                     }
                                 }
