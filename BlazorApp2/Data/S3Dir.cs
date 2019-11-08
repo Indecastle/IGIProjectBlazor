@@ -113,12 +113,15 @@ namespace BlazorApp2.Data
             await UpdateDir();
         }
 
-        public async Task BackDir()
+        public async Task BackDir(int level)
         {
             if (!IsRoot)
             {
-                Level--;
-                CurrentDir = DirStack.Pop();
+                for(int i = 0; i < level; i++)
+                {
+                    Level--;
+                    CurrentDir = DirStack.Pop();
+                }
                 await UpdateDir();
             }
             if (Level == 1) // IsRoot
