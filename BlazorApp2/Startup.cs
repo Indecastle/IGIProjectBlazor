@@ -25,6 +25,7 @@ using Amazon.S3;
 using Amazon.Extensions.NETCore.Setup;
 using EmbeddedBlazorContent;
 using MatBlazor;
+using BlazorApp2.Services;
 
 namespace BlazorApp2
 {
@@ -100,6 +101,7 @@ namespace BlazorApp2
                 config.VisibleStateDuration = 3000;
             });
             services.AddBlazorContextMenu();
+            services.AddHostedService<LifeCycleBackgroundService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

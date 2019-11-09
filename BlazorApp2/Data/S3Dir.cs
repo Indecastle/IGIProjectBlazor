@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace BlazorApp2.Data
 {
+    public enum S3TypeFile
+    {
+        Files, Settings, Account
+    }
     public static class EnumerableExtensions
     {
         public static IEnumerable<T> DistinctBy<T, TKey>(this IEnumerable<T> enumerable, Func<T, TKey> keySelector)
@@ -18,6 +22,8 @@ namespace BlazorApp2.Data
 
     public class S3Dir
     {
+        public readonly string rootPath;
+        const int rootLevel = 3;
         public IS3Service _is3 { get; set; }
         public bool IsUpdating = false;
         public string UserName { get; private set; }
@@ -36,24 +42,21 @@ namespace BlazorApp2.Data
         {
             S3Objs = new List<S3FileObject>();
         }
-        public S3Dir(IS3Service service, string userName)
+        public S3Dir(IS3Service service, string userName, S3TypeFile typeFile)
         {
             _is3 = service;
             UserName = userName;
+            rootPath = $"Users/{userName}/{typeFile.ToString()}";
+            Console.WriteLine("----------------- " + rootPath);
             //BackDirName = BackDirPath = "";
             //DirPath = DirName = userName;
             CurrentDir = new S3DirObject
             {
-                Name = userName,
-                FullPathName = userName
+                Name = typeFile.ToString(),
+                FullPathName = rootPath
             };
             IsRoot = true;
-            Level = 1;
-            CurrentDir = new S3DirObject
-            {
-                Name = userName,
-                FullPathName = userName
-            };
+            Level = rootLevel;
         }
 
         public async Task UpdateDir()
@@ -105,7 +108,7 @@ namespace BlazorApp2.Data
         public async Task SubDir(S3DirObject subobj)
         {
             Level++;
-            IsRoot = (Level == 1);
+            IsRoot = (Level == rootLevel);
             OldDir = CurrentDir;
             DirStack.Push(CurrentDir);
             CurrentDir = subobj;
@@ -124,7 +127,7 @@ namespace BlazorApp2.Data
                 }
                 await UpdateDir();
             }
-            if (Level == 1) // IsRoot
+            if (Level == rootLevel) // IsRoot
             {
                 IsRoot = true;
                 //BackDirName = BackDirPath = "";

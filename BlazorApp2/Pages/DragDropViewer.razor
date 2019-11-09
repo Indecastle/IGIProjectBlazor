@@ -1,0 +1,87 @@
+﻿@page "/dragdrop-viewer"
+@using System.IO;
+@inject IJSRuntime JsRuntime;
+
+<h1>Drag/drop file viewer</h1>
+
+<p>Shows how you can present a custom UI instead of the native file input.</p>
+
+<div class="drag-drop-zone">
+    <InputFile OnChange="ViewFile" />
+    @status
+</div>
+
+<p>Select file to upload:</p>
+<form method="post" action="#" enctype="multipart/form-data">
+    <label class="fileContainer" id="fileSelectBox" ondragover="dragOver(event)" ondragleave="leaveDrop(event)" ondrop="onDrop(event)">
+        <div class="fileContainerFileName" ondrop="onDrop(event)" id="fileName">Select File</div><span class="fileContainerButton">...</span>
+        @*<input name="fs" id="fs" onchange="fileContainerChangeFile(event)" type="file" />*@
+        <InputFile OnChange="ViewFile" />
+    </label>
+</form>
+
+<div class="mybody2">
+    <div class="file-drop-area">
+        <span class="fake-btn">Choose files</span>
+        <span class="file-msg">or drag and drop files here</span>
+        <input class="file-input" type="file" multiple>
+    </div>
+</div>
+
+@if (fileName != null)
+{
+    <h3>@fileName</h3>
+    <pre>@fileTextContents</pre>
+}
+
+@code {
+    [Parameter]
+    public Dictionary<string, object> InputFileAttributes { get; set; } =
+        new Dictionary<string, object>()
+        {
+            { "onchange", "fileContainerChangeFile(event)" },
+            { "id", "fs"},
+            { "name", "fs" }
+        };
+
+    const string DefaultStatus = "Drop a text file here to view it, or click to choose a file";
+    const int MaxFileSize = 5 * 1024 * 1024; // 5MB
+    string status = DefaultStatus;
+
+    string fileName;
+    string fileTextContents;
+
+    async Task ViewFile(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file == null)
+        {
+            return;
+        }
+        else if (file.Size > MaxFileSize)
+        {
+            status = $"That's too big. Max size: {MaxFileSize} bytes.";
+        }
+        else
+        {
+            status = "Loading...";
+
+            using (var reader = new StreamReader(file.Data))
+            {
+                fileTextContents = await reader.ReadToEndAsync();
+                fileName = file.Name;
+            }
+
+            status = DefaultStatus;
+        }
+    }
+
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //{
+    //    if (firstRender || true)
+    //    {
+    //        await JsRuntime.InvokeAsync<object>("dragrender");
+    //    }
+    //    //await JsRuntime.InvokeAsync<object>("console.log", "onAfterRender");
+    //}
+}

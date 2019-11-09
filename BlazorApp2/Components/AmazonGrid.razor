@@ -36,6 +36,13 @@
 </MatDialog>
 
 
+
+
+
+
+
+
+
     <div class="my_sidebar_fixed">
         <div class="my_sidebar__buttons">
             <InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
@@ -48,6 +55,10 @@
                 <div class="my_navigation__items_standard">
                     <MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
                     <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>
+                    <div style="padding-left: 20px;">
+                        <MatSlideToggle @bind-Checked="@IsGetAttachment" Label="Предварительный просмотр: "></MatSlideToggle>
+                    </div>
+                    <span>@IsGetAttachment</span>
                 </div>
             </div>
         </div>
@@ -201,6 +212,10 @@
             </ul>
         </div>
 
+
+
+
+
 @code {
     [Parameter]
     public Dictionary<string, object> InputFileAttributes { get; set; } =
@@ -243,9 +258,12 @@
     public IEnumerable<IS3Object> ItemList { get; set; }
     //IEnumerable<S3FileObject> Items { get; set; }
 
+
+
     public S3Dir Dir { get; set; }
     public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
     public IS3Object selectedItem;
+    public bool IsGetAttachment { get; set; }
 
 
 
@@ -258,7 +276,7 @@
         await GetListFiles();
         ItemList = Dir.SubDirs;
         ItemList = ItemList.Concat(Dir.S3Objs);
-		totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
         ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
 
         SetPagerSize("forward");
@@ -299,7 +317,7 @@
             ShowToast(MatToastType.Success, $"File \"{file.Name}\" is Added");
         }
     }
-    
+
 
 
     public async Task GetListFiles()
@@ -309,7 +327,7 @@
             string userName = await GetUserName();
             await _is3.CreateUserAsync(userName);
             Console.WriteLine("############ STEP #1");
-            Dir = new S3Dir(_is3, userName);
+            Dir = new S3Dir(_is3, userName, S3TypeFile.Files);
             await Dir.UpdateDir();
             Console.WriteLine("############ IS AUTHED");
         }
@@ -363,7 +381,7 @@
 
     public async Task GetGenUrl(S3FileObject obj)
     {
-        string url = _is3.GeneratePreSignedURL(obj.FullPathName);
+        string url = _is3.GeneratePreSignedURL(obj.FullPathName, IsGetAttachment);
         //NavigationManager.NavigateTo(url, false);
         //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
         await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
@@ -379,18 +397,18 @@
 
     public void updateList(int currentPage)
     {
-		curPage = currentPage;
-		startPage = endPage = 0;
-		
+        curPage = currentPage;
+        startPage = endPage = 0;
+
         ItemList = Dir.SubDirs;
         ItemList = ItemList.Concat(Dir.S3Objs);
-		totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
         ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
-		
-		SetPagerSize("forward");
+
+        SetPagerSize("forward");
         selectedItem = null;
         this.StateHasChanged();
-		
+
     }
 
     public void SetPagerSize(string direction)

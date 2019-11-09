@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace BlazorApp2.Data
 {
@@ -48,9 +50,10 @@ namespace BlazorApp2.Data
 
         public async Task CreateUserAsync(string username)
         {
-            string tempPath = username + "/";
-            var fileTransferUtility = new TransferUtility(_client);
-            await fileTransferUtility.UploadAsync(new MemoryStream(), BucketName, tempPath);
+            await CreateFolderAsync($"Users/{username}/");
+            await CreateFolderAsync($"Users/{username}/Files/");
+            await CreateFolderAsync($"Users/{username}/Settings/");
+            await CreateFolderAsync($"Users/{username}/Account/");
 
             //var deleteObjectRequest = new DeleteObjectRequest
             //{
@@ -172,7 +175,7 @@ namespace BlazorApp2.Data
             //var arquivos = files.Select(x => Path.GetFileName(x.Key)).ToList();
         }
 
-        public string GeneratePreSignedURL(string filepath)
+        public string GeneratePreSignedURL(string filepath, bool attachment)
         {
             string urlString = "";
             try
@@ -181,8 +184,13 @@ namespace BlazorApp2.Data
                 {
                     BucketName = BucketName,
                     Key = filepath,
-                    Expires = DateTime.Now.AddMinutes(5)
+                    Expires = DateTime.Now.AddMinutes(5),
+                    
+                    
                 };
+                string typeget = attachment ? "attachment" : "inline";
+                request1.ResponseHeaderOverrides.ContentDisposition = $"{typeget}; filename={Uri.EscapeDataString(Path.GetFileName(filepath))}";
+                //Console.WriteLine("+++++++++++++++++++++" + request1.ResponseHeaderOverrides.ContentDisposition);
                 urlString = _client.GetPreSignedURL(request1);
             }
             catch (AmazonS3Exception e)

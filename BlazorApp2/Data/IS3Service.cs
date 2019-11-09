@@ -15,6 +15,6 @@ namespace BlazorApp2.Data
         Task UploadObjectAsync(Stream stream, string pathObject);
         Task DeleteFilesAsync(IS3Object obj);
         Task<IEnumerable<S3Object>> ListFilesAsync(string dirpath);
-        string GeneratePreSignedURL(string filepath);
+        string GeneratePreSignedURL(string filepath, bool attachment);
     }
 }

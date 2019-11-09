@@ -10,7 +10,11 @@
 
 
 .my_bodystyle {
+    margin: 0px;
     padding: 5px 0px 0px 5px;
+    position: fixed !important;
+    width: 100%;
+    height: 100%;
     background-color: rgb(248,248,248);
 }
 

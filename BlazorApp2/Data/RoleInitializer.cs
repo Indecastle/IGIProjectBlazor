@@ -9,7 +9,7 @@ namespace BlazorApp2.Data
 {
     public class RoleInitializer
     {
-        public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task InitializeAsync(ApplicationContext db, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             string adminEmail = "andred9991@gmail.com";
             string password = "Qwe`123";
@@ -30,6 +30,13 @@ namespace BlazorApp2.Data
                     await userManager.AddToRoleAsync(admin, "admin");
                 }
             }
+            db.FastFiles.Add(new FastFile
+            {
+                Name = "test",
+                KeyName = "test",
+                DateTime = DateTime.Now
+            });
+            await db.SaveChangesAsync();
         }
     }
 

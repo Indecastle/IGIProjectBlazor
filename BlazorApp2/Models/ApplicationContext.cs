@@ -9,10 +9,15 @@ namespace BlazorApp2.Models
 {
     public class ApplicationContext : IdentityDbContext<User>
     {
+
+        public DbSet<FastFile> FastFiles { get; set; }
+
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
             Database.EnsureCreated();
+
         }
+
     }
 }
