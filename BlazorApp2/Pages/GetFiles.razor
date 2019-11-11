@@ -5,17 +5,19 @@
 @inject IMatToaster Toaster
 @implements IDisposable
 
-
-@if (IsTimer)
-{
-    <h2>@Timer.ToString(@"hh\:mm\:ss")</h2>
-    <ChildAmazonGridFiles IsSetFiles="false" Dir="@Dir" IsGetAttachment="@IsGetAttachment" />
-}
-else
-{
-    <h3>Bad Guy</h3>
-}
-
+<div class="my_root_content">
+    <div class="root__content">
+        @if (IsTimer)
+        {
+            <h2>@Timer.ToString(@"hh\:mm\:ss")</h2>
+            <ChildAmazonGridFiles IsSetFiles="false" Dir="@Dir" IsGetAttachment="@IsGetAttachment" />
+        }
+        else
+        {
+            <h3>Bad Guy</h3>
+        }
+    </div>
+</div>
 
 
 

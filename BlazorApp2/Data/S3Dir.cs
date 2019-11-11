@@ -71,7 +71,7 @@ namespace BlazorApp2.Data
             //DirPath = DirName = userName;
             CurrentDir = new S3DirObject
             {
-                Name = Path.GetFileName(rootPath),
+                Name = "Root",
                 FullPathName = rootPath
             };
             IsRoot = true;

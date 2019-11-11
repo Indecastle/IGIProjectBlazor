@@ -20,7 +20,7 @@
 
 
 .root__content {
-    padding: 10px 30px 0 30px;
+    padding: 0px 30px 0 30px;
     background-color: rgb(248,248,248);
 }
 
@@ -80,7 +80,7 @@ div {
     z-index: 1;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    top: 60px;
+    top: 65px;
     bottom: 0;
     left: 0;
     width: 250px;
@@ -108,7 +108,7 @@ div {
 }
 
 .my_navigation__items_standard {
-    padding-top: 27px;
+    padding-top: 7px;
 }
 
 .my_info-space {

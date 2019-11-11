@@ -43,42 +43,43 @@
 
 
 
-    <div class="my_sidebar_fixed">
-        <div class="my_sidebar__buttons">
-            <InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
-            <label for="idfile" class="my_btn my_btn-20"><span>Загрузить</span></label>
-            <label class="my_btn my_btn-20_2"><span>Создать</span></label>
+<div class="my_sidebar_fixed">
+    <div class="my_sidebar__buttons">
+        <InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
+        <label for="idfile" class="my_btn my_btn-20"><span>Загрузить</span></label>
+        <label class="my_btn my_btn-20_20" @onclick="@(e => { dialogIsOpen = true; })"><span>Создать Папку</span></label>
 
-        </div>
-        <div class="my_sidebar__navigation">
-            <div class="my_navigation__scroll">
-                <div class="my_navigation__items_standard">
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
-                    <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>
-                    <div style="padding-left: 20px;">
-                        <MatSlideToggle @bind-Checked="@IsGetAttachment" Label="Предварительный просмотр: "></MatSlideToggle>
-                    </div>
-                    <span>@IsGetAttachment</span>
-                </div>
-            </div>
-        </div>
-        <div class="my_info-space">
-            <div class="alert alert-success" role="alert">
-                <strong>Well done!</strong> Good Boy!
-            </div>
-            <div class="alert alert-info" role="alert">
-                <strong>XXX Link!</strong> 
-                <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+    </div>
+    <div class="my_sidebar__navigation">
+        <div class="my_navigation__scroll">
+            <div class="my_navigation__items_standard">
+                <MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
+                <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>
+                <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })">
+                </MatIconButton>
+                <span>preview: @IsGetAttachment</span>
             </div>
         </div>
     </div>
-    <div class="my_root_content">
-        <div class="root__content" >
-            <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white" @onclick="(e => { selectedItem = null; })">
-                <div class="d-inline-flex" style="width: 100%;">
-                    <div class="d-inline-flex" style="padding-left: 20px;">
-                        <MatButton Disabled="@BackDisabled" OnClick="@(async e => await GoToBackDir(1))">Back</MatButton>
-                        <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
+    <div class="my_info-space">
+        <div class="alert alert-success" role="alert">
+            <strong>Well done!</strong> Good Boy!
+        </div>
+        <div class="alert alert-info" role="alert">
+            <strong>XXX Link!</strong> 
+            <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+        </div>
+    </div>
+</div>
+
+<div class="my_root_content">
+
+    <div class="root__content" >
+        <ContextMenuTrigger MenuId="myBackmenu" WrapperTag="div" CssClass="root__content-inner_white" @onclick="(e => { selectedItem = null; })">
+            <div class="d-inline-flex" style="width: 100%;">
+                <div class="d-inline-flex" style="padding-left: 20px;">
+                    <MatButton Disabled="@BackDisabled" OnClick="@(async e => await GoToBackDir(1))">Back</MatButton>
+                    <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
                         @*@if (selectedItem is S3DirObject)
                         {
                             <span>Folder: @selectedItem?.Name</span>
@@ -87,45 +88,90 @@
                         {
                             <span>File: @selectedItem?.Name</span>
                         }*@
-                    </div>
-                    <div class="d-inline-flex" style="align-items: center;">
-                        @if (Dir != null)
+                </div>
+                <div class="d-inline-flex" style="align-items: center;">
+                    @if (Dir != null)
+                    {
+                        int i = Dir.DirStack.Count;
+                        @foreach (var folder in Dir.DirStack.Reverse())
                         {
-                            int i = Dir.DirStack.Count;
-                            @foreach (var folder in Dir.DirStack.Reverse())
-                            {
-                                int j = i;
-                                <div class="myinlineblock" @onclick="@(async e => await GoToBackDir(j))">@folder.Name</div>
-                                <div class="myinlineblock"><i class="fas fa-chevron-right"></i></div>
-                                i--;
-                            }
-                            <div class="myinlineblock">@Dir.CurrentDir.Name</div>
+                            int j = i;
+                            <div class="myinlineblock" @onclick="@(async e => await GoToBackDir(j))">@folder.Name</div>
+                            <div class="myinlineblock"><i class="fas fa-chevron-right"></i></div>
+                            i--;
                         }
-                    </div>
+                        <div class="myinlineblock">@Dir.CurrentDir.Name</div>
+                    }
+                </div>
                     @if (selectedItem != null)
                     {
                         <div class="d-inline-flex myendblock">
                             <i class="fas fa-chevron-circle-left"></i>
                         </div>
                     }
-                </div>
-                <div>
-                    <table class="table table-borderless" @key="ItemList">
-                        <thead>
-                            <tr class="blazor">
-                                <th>Name</th>
-                                <th>Size</th>
-                                <th>LastModified</th>
-                                @*<th>Owner</th>
-                                <th>ETag</th>
-                                <th>StorageClass</th>*@
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Dir == null || Dir.IsUpdating)
+            </div>
+            <div>
+                <table class="table table-borderless" @key="ItemList">
+                    <thead>
+                        <tr class="blazor">
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>LastModified</th>
+                            @*<th>Owner</th>
+                            <th>ETag</th>
+                            <th>StorageClass</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Dir == null || Dir.IsUpdating)
+                        {
+                            //<p><em>Loading...</em></p>
+                            @for (int i = 0; i < PageSize; i++)
                             {
-                                //<p><em>Loading...</em></p>
-                                @for (int i = 0; i < PageSize; i++)
+                                <tr class="blazor-row-item" style="height: 46px;">
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    @*<td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>*@
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var item in ItemList)
+                            {
+                                string cssClass = "blazor-row-item myrowstyle stopprop " + (selectedItem == item ? "selected" : "");
+                                if ((item as S3DirObject) != null)
+                                {
+                                    var dirobj = item as S3DirObject;
+                                    <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))" >
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
+                                        @*<td scope="col"></td>
+                                        <td scope="col"></td>
+                                        <td scope="col"></td>*@
+                                    </ContextMenuTrigger>
+                                }
+                                else
+                                {
+                                    var fileobj = item as S3FileObject;
+                                    <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" >
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> @GetIcon(fileobj) @fileobj.Name </td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@(fileobj.Size / 1024) Kb</td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@fileobj.LastModified</td>
+                                        @*<td scope="col">@fileobj.Owner</td>
+                                        <td scope="col">@fileobj.ETag</td>
+                                        <td scope="col">@fileobj.StorageClass</td>*@
+                                    </ContextMenuTrigger>
+                                }
+                            }
+                            int count2 = PageSize - ItemList.Count();
+                            if (count2 > 0)
+                            {
+                                @for (int i = 0; i < count2; i++)
                                 {
                                     <tr class="blazor-row-item" style="height: 46px;">
                                         <td scope="col"></td>
@@ -137,80 +183,35 @@
                                     </tr>
                                 }
                             }
-                            else
-                            {
-                                @foreach (var item in ItemList)
-                                {
-                                    string cssClass = "blazor-row-item myrowstyle stopprop " + (selectedItem == item ? "selected" : "");
-                                    if ((item as S3DirObject) != null)
-                                    {
-                                        var dirobj = item as S3DirObject;
-                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))" >
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
-                                            @*<td scope="col"></td>
-                                            <td scope="col"></td>
-                                            <td scope="col"></td>*@
-                                        </ContextMenuTrigger>
-                                    }
-                                    else
-                                    {
-                                        var fileobj = item as S3FileObject;
-                                        <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))" >
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> @GetIcon(fileobj) @fileobj.Name </td>
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@(fileobj.Size / 1024) Kb</td>
-                                            <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@fileobj.LastModified</td>
-                                            @*<td scope="col">@fileobj.Owner</td>
-                                            <td scope="col">@fileobj.ETag</td>
-                                            <td scope="col">@fileobj.StorageClass</td>*@
-                                        </ContextMenuTrigger>
-                                    }
-                                }
-                                int count2 = PageSize - ItemList.Count();
-                                if (count2 > 0)
-                                {
-                                    @for (int i = 0; i < count2; i++)
-                                    {
-                                        <tr class="blazor-row-item" style="height: 46px;">
-                                            <td scope="col"></td>
-                                            <td scope="col"></td>
-                                            <td scope="col"></td>
-                                            @*<td scope="col"></td>
-                                            <td scope="col"></td>
-                                            <td scope="col"></td>*@
-                                        </tr>
-                                    }
-                                }
-                            }
-                            </tbody>
-                            </table>
-                        </div>
-            </ContextMenuTrigger>
-        </div>
-            <ul class="pagination" style="padding: 10px 0px 0px 30px;">
-                <li class="page-item">
-                    <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("back"))>&laquo</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("previous"))>Prev</a>
-                </li>
-                @for (int i = startPage; i <= endPage; i++)
-                {
-                    var currentPage = i;
-                    <li class="page-item @(currentPage==curPage?"active":"")" aria-current="page">
-                        <a class="page-link" @onclick=@(async () => updateList(currentPage))> @currentPage <span class="sr-only">(current)</span></a>
-                    </li>
-                }
-                <li class="page-item">
-                    <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("next"))>Next</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("forward"))>&raquo;</a>
-                </li>
-                <span class="pagebutton btn btn-link disabled">Page @curPage of @totalPages</span>
-            </ul>
-        </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </ContextMenuTrigger>
+    </div>
+    <ul class="pagination" style="padding: 10px 0px 0px 30px;">
+        <li class="page-item">
+            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("back"))>&laquo</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("previous"))>Prev</a>
+        </li>
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            var currentPage = i;
+            <li class="page-item @(currentPage==curPage?"active":"")" aria-current="page">
+                <a class="page-link" @onclick=@(async () => updateList(currentPage))> @currentPage <span class="sr-only">(current)</span></a>
+            </li>
+        }
+        <li class="page-item">
+            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("next"))>Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("forward"))>&raquo;</a>
+        </li>
+        <span class="pagebutton btn btn-link disabled">Page @curPage of @totalPages</span>
+    </ul>
+</div>
 
 
 

@@ -10,7 +10,7 @@
 <div class="my_sidebar_fixed">
     <div class="my_sidebar__buttons">
         <label for="idfile" class="my_btn my_btn-20"><span>Загрузить</span></label>
-        <label class="my_btn my_btn-20_2"><span>Создать</span></label>
+        <label class="my_btn my_btn-20_2" @onclick="@(e => { DialogIsOpen = true; })"><span>Создать</span></label>
 
     </div>
     <div class="my_sidebar__navigation">
@@ -18,10 +18,9 @@
             <div class="my_navigation__items_standard">
                 <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" ondblclick="myFunction('staticUrl')">
                 <MatButton Link="@UrlShared">Перейти</MatButton>
-                <div style="padding-left: 20px;">
-                    <MatSlideToggle @bind-Checked="@IsGetAttachment" Label="Предварительный просмотр: "></MatSlideToggle>
-                </div>
-                <span>@IsGetAttachment</span>
+                <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })">
+                </MatIconButton>
+                <span>preview: @IsGetAttachment</span>
                 <strong> @(IsTimer ? Timer.ToString(@"hh\:mm\:ss") : "")</strong>
             </div>
         </div>
@@ -36,9 +35,12 @@
         </div>
     </div>
 </div>
-<ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@IsGetAttachment" EventNewFolder="EventNewFolder"/>
-<a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
-
+<div class="my_root_content">
+    <div class="root__content">
+        <ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@IsGetAttachment" EventNewFolder="EventNewFolder" @bind-DialogIsOpen="DialogIsOpen"/>
+        <a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
+    </div>
+</div>
 
 
 
@@ -47,7 +49,7 @@
 @code {
     [Parameter]
     public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
-{
+    {
         { "hidden", "" },
         { "id", "idfile"}
     };
@@ -58,6 +60,8 @@
     FastFile ffile { get; set; }
     private bool IsFirstSender = true;
     string UrlShared;
+    [Parameter]
+    public bool DialogIsOpen { get; set; }
 
     public async Task EventNewFolder()
     {
