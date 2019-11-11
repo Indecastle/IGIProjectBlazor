@@ -1,4 +1,7 @@
 ﻿@page "/UploadFastFilePage"
+@inject IS3Service _is3;
+@inject ApplicationContext _db;
+@inject NavigationManager NavigationManager
 <h1>UploadFastFilePage</h1>
 
 
@@ -11,11 +14,21 @@
     </label>
 </form>
 @status
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Link Title</h4>
+        <p class="card-text">
+            Copy this Link to Shared.
+        </p>
+        <a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
+    </div>
+</div>
 
 @code {
     const string DefaultStatus = "Drop a text file here to view it, or click to choose a file";
     const int MaxFileSize = 5 * 1024 * 1024; // 5MB
     string status = DefaultStatus;
+    string UrlShared;
 
     string fileName;
     string fileTextContents;
@@ -36,13 +49,27 @@
         {
             status = "Loading...";
 
-            using (var reader = new StreamReader(file.Data))
+            using (var ms = new MemoryStream())
             {
-                fileTextContents = await reader.ReadToEndAsync();
-                fileName = file.Name;
+                Task task1 = file.Data.CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                FastFile ffile = new FastFile(file.Name, new TimeSpan(0, 0, 30));
+                _db.FastFiles.Add(ffile);
+                await _db.SaveChangesAsync();
+                await task1;
+                Console.WriteLine("######### CopyEnded");
+                await _is3.UploadObjectAsync(ms, "TempFiles/" + ffile.KeyName);
+                Console.WriteLine("######### UploadedToS3");
+                UrlShared = $"https://localhost:5001/GetTempFileObject/{ffile.KeyName}/";
             }
 
             status = DefaultStatus;
         }
+    }
+
+
+    async Task UplaodFileToFast()
+    {
+
     }
 }

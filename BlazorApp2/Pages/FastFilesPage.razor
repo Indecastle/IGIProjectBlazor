@@ -1,7 +1,47 @@
-﻿@using BlazorApp2.Models;
+﻿@page "/GetTempFileObject/"
+@page "/GetTempFileObject/{KeyName}/"
+@using BlazorApp2.Models;
 @inject ApplicationContext _db;
-<h3>FastFilesPage</h3>
+@inject IJSRuntime JsRuntime;
+@inject IS3Service _is3;
+@if (ffile != null)
+{
+    <h1>FastFilesPage</h1>
+    <h2>Id: @ffile?.Id</h2>
+    <h2>Name: @ffile?.Name</h2>
+    <h2>KeyName: @ffile?.KeyName</h2>
+    <h3>EndTime: @ffile?.EndTime</h3>
+    <MatButton OnClick="@GetGenUrl" Label="Downlaod"></MatButton>
+}
+else if (KeyName == null)
+{
+    <h2>KeyName not found</h2>
+}
+else
+{
+    <h2>File not found</h2>
+}
+
 
 @code {
+    [Parameter]
+    public string KeyName { get; set; }
 
+    FastFile ffile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ffile = _db.FastFiles.FirstOrDefault(f => f.KeyName == KeyName);
+        if (ffile != null)
+        {
+        }
+    }
+
+    public async Task GetGenUrl()
+    {
+        string url = _is3.GeneratePreSignedURL("TempFiles/" + KeyName, true, ffile.Name);
+        //NavigationManager.NavigateTo(url, false);
+        //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
+        await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
+    }
 }

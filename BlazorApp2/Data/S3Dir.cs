@@ -1,6 +1,7 @@
 ﻿using Amazon.S3.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace BlazorApp2.Data
     public class S3Dir
     {
         public readonly string rootPath;
-        const int rootLevel = 3;
+        public readonly int rootLevel = 3;
         public IS3Service _is3 { get; set; }
         public bool IsUpdating = false;
         public string UserName { get; private set; }
@@ -44,6 +45,7 @@ namespace BlazorApp2.Data
         }
         public S3Dir(IS3Service service, string userName, S3TypeFile typeFile)
         {
+            rootLevel = 3;
             _is3 = service;
             UserName = userName;
             rootPath = $"Users/{userName}/{typeFile.ToString()}";
@@ -53,6 +55,23 @@ namespace BlazorApp2.Data
             CurrentDir = new S3DirObject
             {
                 Name = typeFile.ToString(),
+                FullPathName = rootPath
+            };
+            IsRoot = true;
+            Level = rootLevel;
+        }
+        public S3Dir(IS3Service service, string rootPath)
+        {
+            rootLevel = rootPath.Split('/').Length;
+            _is3 = service;
+            UserName = "";
+            this.rootPath = rootPath;
+            Console.WriteLine("----------------- " + rootPath);
+            //BackDirName = BackDirPath = "";
+            //DirPath = DirName = userName;
+            CurrentDir = new S3DirObject
+            {
+                Name = Path.GetFileName(rootPath),
                 FullPathName = rootPath
             };
             IsRoot = true;

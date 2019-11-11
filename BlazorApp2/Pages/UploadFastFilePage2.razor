@@ -1,0 +1,162 @@
+﻿@page "/UploadFiles"
+@inject IS3Service _is3;
+@inject ApplicationContext _db;
+@inject IJSRuntime JsRuntime;
+@inject IMatToaster Toaster
+@implements IDisposable
+
+<InputFile OnChange="HandleSelection" @attributes="InputFileAttributes" />
+
+<div class="my_sidebar_fixed">
+    <div class="my_sidebar__buttons">
+        <label for="idfile" class="my_btn my_btn-20"><span>Загрузить</span></label>
+        <label class="my_btn my_btn-20_2"><span>Создать</span></label>
+
+    </div>
+    <div class="my_sidebar__navigation">
+        <div class="my_navigation__scroll">
+            <div class="my_navigation__items_standard">
+                <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" ondblclick="myFunction('staticUrl')">
+                <MatButton Link="@UrlShared">Перейти</MatButton>
+                <div style="padding-left: 20px;">
+                    <MatSlideToggle @bind-Checked="@IsGetAttachment" Label="Предварительный просмотр: "></MatSlideToggle>
+                </div>
+                <span>@IsGetAttachment</span>
+                <strong> @(IsTimer ? Timer.ToString(@"hh\:mm\:ss") : "")</strong>
+            </div>
+        </div>
+    </div>
+    <div class="my_info-space">
+        <div class="alert alert-success" role="alert">
+            <strong>Well done!</strong> Good Boy!
+        </div>
+        <div class="alert alert-info" role="alert">
+            <strong>XXX Link!</strong>
+            <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+        </div>
+    </div>
+</div>
+<ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@IsGetAttachment" EventNewFolder="EventNewFolder"/>
+<a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
+{
+        { "hidden", "" },
+        { "id", "idfile"}
+    };
+
+    public S3Dir Dir { get; set; }
+    public bool IsGetAttachment { get; set; }
+    public Guid KeyShared { get; set; }
+    FastFile ffile { get; set; }
+    private bool IsFirstSender = true;
+    string UrlShared;
+
+    public async Task EventNewFolder()
+    {
+        if (IsFirstSender)
+        {
+            IsFirstSender = false;
+            IsTimer = true;
+
+            ffile.UpdateSpan(TimeSpan.FromSeconds(30));
+            string tempRootPath = "TempFiles/" + ffile.KeyName;
+            await _is3.CreateFolderAsync(tempRootPath);
+            await Dir.UpdateDir();
+
+            _db.FastFiles.Add(ffile);
+            await _db.SaveChangesAsync();
+            UrlShared = $"https://localhost:5001/GetFiles/{ffile.KeyName}/";
+            Timer_Tick();
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        KeyShared = Guid.NewGuid();
+        ffile = new FastFile(KeyShared, new TimeSpan(0, 0, 30));
+        if (KeyShared != null)
+        {
+            string tempRootPath = "TempFiles/" + ffile.KeyName;
+            Dir = new S3Dir(_is3, tempRootPath);
+            await Dir.UpdateDir();
+        }
+        else
+        {
+            Dir = null;
+        }
+    }
+
+    protected override bool ShouldRender()
+    {
+        bool renderUI = !Dir.IsUpdating;
+
+        return true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || true)
+        {
+            await JsRuntime.InvokeAsync<object>("onafterrender");
+        }
+        //await JsRuntime.InvokeAsync<object>("console.log", "onAfterRender");
+    }
+
+    public void ShowToast(MatToastType type, string message, string title = null, string icon = "")
+    {
+        Toaster.Add(message, type, title, icon);
+    }
+
+    async Task OpenDialog(ItemClickEventArgs e)
+    {
+        await JsRuntime.InvokeAsync<object>("my_opendialog", "idfile");
+    }
+
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        await EventNewFolder();
+        var file = files.FirstOrDefault();
+        if (file != null)
+        {
+            // Just load into .NET memory to show it can be done
+            // Alternatively it could be saved to disk, or parsed in memory, or similar
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            await _is3.UploadObjectAsync(ms, Dir.CurrentDir.FullPathName + '/' + file.Name);
+            await Dir.UpdateDir();
+            ShowToast(MatToastType.Success, $"File \"{file.Name}\" is Added");
+        }
+    }
+
+    bool IsTimer { get; set; }
+    TimeSpan Timer { get; set; }
+    async Task Timer_Tick()
+    {
+        while (IsTimer && ffile.EndTime > DateTime.Now)
+        {
+            Timer = ffile.EndTime.Subtract(DateTime.Now);
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(1000);
+        }
+        IsTimer = false;
+        IsFirstSender = true;
+        await OnInitializedAsync();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        IsTimer = false;
+    }
+}

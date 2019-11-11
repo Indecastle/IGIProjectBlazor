@@ -1,0 +1,440 @@
+﻿@inject IS3Service _is3;
+@inject IJSRuntime JsRuntime;
+@inject IMatToaster Toaster
+@using System.IO;
+
+@if (IsSetFiles)
+{
+    <ContextMenu Id="myMenu" AutoHide="true" Animation="Animation.Grow" CssClass="my_contextmenu">
+    <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
+    <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
+    <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
+    <Seperator />
+    <Item>
+        Submenu
+        <SubMenu>
+            <Item OnClick="@OnClick">Submenu Item 1</Item>
+            <Item OnClick="@OnClick">Submenu Item 2</Item>
+        </SubMenu>
+    </Item>
+</ContextMenu>
+
+<ContextMenu Id="myBackmenu" AutoHide="true" Animation="Animation.Zoom" CssClass="my_contextmenu">
+    <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>
+    <Item OnClick="@OpenDialog"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
+</ContextMenu>
+
+
+<MatDialog @bind-IsOpen="@dialogIsOpen" CanBeClosed="false" Class="my_contextmenu">
+    <MatDialogTitle>Create Folder</MatDialogTitle>
+    <MatDialogContent>
+        <p>What's your new folder name?</p>
+        <MatTextField @bind-Value="@dialogTextField" Label="Name folder"></MatTextField>
+    </MatDialogContent>
+    <MatDialogActions>
+        <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
+        <MatButton OnClick="@CreateFolder">OK</MatButton>
+    </MatDialogActions>
+</MatDialog>
+}
+
+
+
+
+
+<div class="my_root_content">
+    <div class="root__content">
+        <ContextMenuTrigger MenuId="@(IsSetFiles ? "myBackmenu" : "null")" WrapperTag="div" CssClass="root__content-inner_white" @onclick="(e => { selectedItem = null; })">
+            <div class="d-inline-flex" style="width: 100%;">
+                <div class="d-inline-flex" style="padding-left: 20px;">
+                    <MatButton Disabled="@BackDisabled" OnClick="@(async e => await GoToBackDir(1))">Back</MatButton>
+                    <button @onclick="@(() => StateHasChanged())" hidden>Update</button>
+                    @*@if (selectedItem is S3DirObject)
+                    {
+                        <span>Folder: @selectedItem?.Name</span>
+                    }
+                    else if (selectedItem is S3FileObject)
+                    {
+                        <span>File: @selectedItem?.Name</span>
+                    }*@
+                </div>
+                <div class="d-inline-flex" style="align-items: center;">
+                    @if (Dir != null && Dir.DirStack != null)
+                    {
+                        int i = Dir.DirStack.Count;
+                        @foreach (var folder in Dir.DirStack.Reverse())
+                        {
+                            int j = i;
+                            <div class="myinlineblock" @onclick="@(async e => await GoToBackDir(j))">@folder.Name</div>
+                            <div class="myinlineblock"><i class="fas fa-chevron-right"></i></div>
+                            i--;
+                        }
+                        <div class="myinlineblock">@Dir.CurrentDir.Name</div>
+                    }
+                </div>
+                @if (selectedItem != null)
+                {
+                    <div class="d-inline-flex myendblock">
+                        <i class="fas fa-chevron-circle-left"></i>
+                    </div>
+                }
+            </div>
+            <div>
+                <table class="table table-borderless" @key="ItemList">
+                    <thead>
+                        <tr class="blazor">
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>LastModified</th>
+                            @*<th>Owner</th>
+                                <th>ETag</th>
+                                <th>StorageClass</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Dir == null || Dir.IsUpdating)
+                        {
+                            //<p><em>Loading...</em></p>
+                            @for (int i = 0; i < PageSize; i++)
+                            {
+                                <tr class="blazor-row-item" style="height: 46px;">
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    <td scope="col"></td>
+                                    @*<td scope="col"></td>
+                                        <td scope="col"></td>
+                                        <td scope="col"></td>*@
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var item in ItemList)
+                            {
+                                string cssClass = "blazor-row-item myrowstyle stopprop " + (selectedItem == item ? "selected" : "");
+                                if ((item as S3DirObject) != null)
+                                {
+                                    var dirobj = item as S3DirObject;
+                                    <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GoToSubDir(dirobj))">
+                                <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> <i class="fas fa-folder fa-lg" style="color: Tomato;"></i> @dirobj.Name </td>
+                                <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
+                                <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"></td>
+                                @*<td scope="col"></td>
+                                <td scope="col"></td>
+                                <td scope="col"></td>*@
+                                </ContextMenuTrigger>
+                                }
+                                else
+                                {
+                                    var fileobj = item as S3FileObject;
+                                    <ContextMenuTrigger MenuId="myMenu" WrapperTag="tr" CssClass="@cssClass" Data="item" @ondblclick="@(async () => await GetGenUrl(fileobj))">
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true"> @GetIcon(fileobj) @fileobj.Name </td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@(fileobj.Size / 1024) Kb</td>
+                                        <td scope="col" @onclick="(e => { selectedItem = item; })" @onclick:stopPropagation="true">@fileobj.LastModified</td>
+                                        @*<td scope="col">@fileobj.Owner</td>
+                                        <td scope="col">@fileobj.ETag</td>
+                                        <td scope="col">@fileobj.StorageClass</td>*@
+                                    </ContextMenuTrigger>
+                                }
+                            }
+                            int count2 = PageSize - ItemList.Count();
+                            if (count2 > 0)
+                            {
+                                @for (int i = 0; i < count2; i++)
+                                {
+                                    <tr class="blazor-row-item" style="height: 46px;">
+                                        <td scope="col"></td>
+                                        <td scope="col"></td>
+                                        <td scope="col"></td>
+                                        @*<td scope="col"></td>
+                                        <td scope="col"></td>
+                                        <td scope="col"></td>*@
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </ContextMenuTrigger>
+    </div>
+    <ul class="pagination" style="padding: 10px 0px 0px 30px;">
+        <li class="page-item">
+            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("back"))>&laquo</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("previous"))>Prev</a>
+        </li>
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            var currentPage = i;
+            <li class="page-item @(currentPage==curPage?"active":"")" aria-current="page">
+                <a class="page-link" @onclick=@(async () => updateList(currentPage))> @currentPage <span class="sr-only">(current)</span></a>
+            </li>
+        }
+        <li class="page-item">
+            <a class="page-link bg-light text-dark" @onclick=@(async () => NavigateToPage("next"))>Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link bg-info text-white" @onclick=@(async () => SetPagerSize("forward"))>&raquo;</a>
+        </li>
+        <span class="pagebutton btn btn-link disabled">Page @curPage of @totalPages</span>
+    </ul>
+</div>
+
+
+@code {
+    [Parameter]
+    public Dictionary<string, object>
+    InputFileAttributes { get; set; } = new Dictionary<string, object> ()
+    {
+        { "hidden", "" },
+        { "id", "idfile"}
+    };
+    bool dialogIsOpen = false;
+    string dialogTextField = null;
+
+    void OnClick(ItemClickEventArgs e)
+    {
+        Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
+    }
+    async Task OpenDialog(ItemClickEventArgs e)
+    {
+        await JsRuntime.InvokeAsync<object>("my_opendialog", InputFileAttributes["id"]);
+    }
+    public void ShowToast(MatToastType type, string message, string title = null, string icon = "")
+    {
+        Toaster.Add(message, type, title, icon);
+    }
+
+    int totalPages;
+    int curPage;
+    int pagerSize;
+    int startPage;
+    int endPage;
+    public int PageSize;
+
+    public IEnumerable<IS3Object> ItemList { get; set; }
+    public bool BackDisabled => Dir == null ? false : Dir.IsRoot;
+    public IS3Object selectedItem;
+
+    [Parameter]
+    public bool IsGetAttachment { get; set; }
+
+    private S3Dir _dir;
+    [Parameter]
+    public S3Dir Dir { 
+        get { return _dir; }
+        set {
+            _dir = value;
+            OnInitializedAsync();
+        }
+    }
+
+    [Parameter]
+    public bool IsSetFiles { get; set; }
+    [Parameter]
+    public Func<Task> EventNewFolder { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PageSize = 10;
+        pagerSize = 5;
+        curPage = 1;
+
+        if(Dir != null)
+        {
+            //await Dir.UpdateDir();
+            ItemList = Dir.SubDirs;
+            ItemList = ItemList.Concat(Dir.S3Objs);
+            totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+            ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
+
+            SetPagerSize("forward");
+        }
+
+    }
+
+    protected override bool ShouldRender()
+    {
+        bool renderUI = !Dir.IsUpdating;
+
+        return true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || true)
+        {
+            await JsRuntime.InvokeAsync<object>("onafterrender");
+        }
+        //await JsRuntime.InvokeAsync<object>("console.log", "onAfterRender");
+    }
+
+
+
+
+
+
+    public async Task GoToSubDir(S3DirObject obj)
+    {
+        Dir.IsUpdating = true;
+        await Dir.SubDir(obj);
+        Dir.IsUpdating = false;
+        curPage = 1;
+        updateList(curPage);
+    }
+
+    public async Task GoToBackDir(int level)
+    {
+        Dir.IsUpdating = true;
+        await Dir.BackDir(level);
+        Dir.IsUpdating = false;
+        curPage = 1;
+        updateList(curPage);
+    }
+
+    public async Task DeleteFileOrFolder(ItemClickEventArgs e)
+    {
+        await Task.Run(async () =>
+        {
+            await _is3.DeleteFilesAsync((e.Data as IS3Object)?.FullPathName);
+            await Dir.UpdateDir();
+        });
+
+        curPage = 1;
+        updateList(curPage);
+        ShowToast(MatToastType.Success, (e.Data is S3DirObject ? "Folder " : "File \"") + ((IS3Object)e.Data)?.Name + "\" deleted" );
+    }
+
+    public async Task CreateFolder(MouseEventArgs e)
+    {
+        await EventNewFolder();
+        dialogIsOpen = false;
+        await Dir.CreateFolder(dialogTextField);
+        await Dir.UpdateDir();
+        curPage = 1;
+        updateList(curPage);
+        ShowToast(MatToastType.Success, $"Folder \"{dialogTextField}\" is Added" );
+        dialogTextField = string.Empty;
+    }
+
+    public async Task GetGenUrl(S3FileObject obj)
+    {
+        string url = _is3.GeneratePreSignedURL(obj.FullPathName, IsGetAttachment);
+        //NavigationManager.NavigateTo(url, false);
+        //await JsRuntime.InvokeAsync<object>("open", url, "_blank");
+        await JsRuntime.InvokeAsync<object>("mydownloadFile", url);
+    }
+
+
+
+
+
+
+
+
+
+    public void updateList(int currentPage)
+    {
+        curPage = currentPage;
+        startPage = endPage = 0;
+
+        ItemList = Dir.SubDirs;
+        ItemList = ItemList.Concat(Dir.S3Objs);
+        totalPages = (int)Math.Ceiling(ItemList.Count() / (decimal)PageSize);
+        ItemList = ItemList.Skip((curPage - 1) * PageSize).Take(PageSize);
+
+        SetPagerSize("forward");
+        selectedItem = null;
+        this.StateHasChanged();
+
+    }
+
+    public void SetPagerSize(string direction)
+    {
+        if (direction == "forward" && endPage < totalPages)
+        {
+            startPage = endPage + 1;
+            if (endPage + pagerSize < totalPages)
+            {
+                endPage = startPage + pagerSize - 1;
+            }
+            else
+            {
+                endPage = totalPages;
+            }
+            this.StateHasChanged();
+        }
+        else if (direction == "back" && startPage > 1)
+        {
+            endPage = startPage - 1;
+            startPage = startPage - pagerSize;
+        }
+    }
+
+    public void NavigateToPage(string direction)
+    {
+        if (direction == "next")
+        {
+            if (curPage < totalPages)
+            {
+                if (curPage == endPage)
+                {
+                    SetPagerSize("forward");
+                }
+                curPage += 1;
+            }
+        }
+        else if (direction == "previous")
+        {
+            if (curPage > 1)
+            {
+                if (curPage == startPage)
+                {
+                    SetPagerSize("back");
+                }
+                curPage -= 1;
+            }
+        }
+
+        updateList(curPage);
+    }
+
+
+
+
+
+
+
+    public RenderFragment GetIcon(S3FileObject obj)
+    {
+        string ext = Path.GetExtension(obj.Name);
+        switch (ext)
+        {
+            case ".pdf":
+                return@<i class="far fa-file-pdf fa-lg" style="color: rgb(234, 67, 53);"></i>;
+
+            case ".txt":
+            case ".docx":
+                return @<i class="far fa-file-word fa-lg" style="color: rgb(66, 133, 244);"></i>;
+
+            case ".mp4":
+            case ".avi":
+                return @<i class="far fa-file-video fa-lg" style="color: orange;"></i>;
+
+            case ".zip":
+            case ".rar":
+                return @<i class="far fa-file-archive fa-lg" style="color: rgb(205, 42, 80);"></i>;
+
+            case ".png":
+            case ".jpg":
+            case ".jpeg":
+            case ".iso":
+                return @<i class="far fa-file-image fa-lg" style="color: rgb(21, 170, 191);"></i>;
+
+            default:
+                return @<i class="far fa-file fa-lg"></i>;
+        }
+    }
+}

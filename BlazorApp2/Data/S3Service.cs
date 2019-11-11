@@ -64,28 +64,32 @@ namespace BlazorApp2.Data
 
         }
 
-        public async Task DeleteFilesAsync(IS3Object obj)
+        public async Task DeleteFilesAsync(string fullPathName)
         {
-            var S3ListFiles = await ListFilesAsync(obj.FullPathName);
+            var S3ListFiles = await ListFilesAsync(fullPathName);
 
-            var keysAndVersions = await PutObjectsAsync(S3ListFiles);
+            if(S3ListFiles.Count() > 0)
+            {
+                var keysAndVersions = await PutObjectsAsync(S3ListFiles);
 
-            DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest
-            {
-                BucketName = BucketName,
-                Objects = keysAndVersions // This includes the object keys and null version IDs.
-            };
-            // You can add specific object key to the delete request using the .AddKey.
-            // multiObjectDeleteRequest.AddKey("TickerReference.csv", null);
-            try
-            {
-                DeleteObjectsResponse response = await _client.DeleteObjectsAsync(multiObjectDeleteRequest);
-                Console.WriteLine("Successfully deleted all the {0} items", response.DeletedObjects.Count);
+                DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest
+                {
+                    BucketName = BucketName,
+                    Objects = keysAndVersions // This includes the object keys and null version IDs.
+                };
+                // You can add specific object key to the delete request using the .AddKey.
+                // multiObjectDeleteRequest.AddKey("TickerReference.csv", null);
+                try
+                {
+                    DeleteObjectsResponse response = await _client.DeleteObjectsAsync(multiObjectDeleteRequest);
+                    Console.WriteLine("Successfully deleted all the {0} items", response.DeletedObjects.Count);
+                }
+                catch (DeleteObjectsException e)
+                {
+                    PrintDeletionErrorStatus(e);
+                }
             }
-            catch (DeleteObjectsException e)
-            {
-                PrintDeletionErrorStatus(e);
-            }
+            
         }
 
         private static void PrintDeletionErrorStatus(DeleteObjectsException e)
@@ -175,7 +179,7 @@ namespace BlazorApp2.Data
             //var arquivos = files.Select(x => Path.GetFileName(x.Key)).ToList();
         }
 
-        public string GeneratePreSignedURL(string filepath, bool attachment)
+        public string GeneratePreSignedURL(string filepath, bool attachment, string fileName = null)
         {
             string urlString = "";
             try
@@ -189,7 +193,8 @@ namespace BlazorApp2.Data
                     
                 };
                 string typeget = attachment ? "attachment" : "inline";
-                request1.ResponseHeaderOverrides.ContentDisposition = $"{typeget}; filename={Uri.EscapeDataString(Path.GetFileName(filepath))}";
+                fileName = fileName ?? Path.GetFileName(filepath);
+                request1.ResponseHeaderOverrides.ContentDisposition = $"{typeget}; filename={Uri.EscapeDataString(fileName)}";
                 //Console.WriteLine("+++++++++++++++++++++" + request1.ResponseHeaderOverrides.ContentDisposition);
                 urlString = _client.GetPreSignedURL(request1);
             }

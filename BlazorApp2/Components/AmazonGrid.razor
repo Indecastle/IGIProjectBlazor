@@ -328,6 +328,7 @@
             await _is3.CreateUserAsync(userName);
             Console.WriteLine("############ STEP #1");
             Dir = new S3Dir(_is3, userName, S3TypeFile.Files);
+            //Dir = new S3Dir(_is3, $"Users/{userName}/Files");
             await Dir.UpdateDir();
             Console.WriteLine("############ IS AUTHED");
         }
@@ -359,7 +360,7 @@
     {
         await Task.Run(async () =>
         {
-            await _is3.DeleteFilesAsync(e.Data as IS3Object);
+            await _is3.DeleteFilesAsync((e.Data as IS3Object)?.FullPathName);
             await Dir.UpdateDir();
         });
 

@@ -30,12 +30,12 @@ namespace BlazorApp2.Data
                     await userManager.AddToRoleAsync(admin, "admin");
                 }
             }
-            db.FastFiles.Add(new FastFile
-            {
-                Name = "test",
-                KeyName = "test",
-                DateTime = DateTime.Now
-            });
+            //db.FastFiles.Add(new FastFile
+            //{
+            //    Name = "test",
+            //    KeyName = "test",
+            //    DateTime = DateTime.Now
+            //});
             await db.SaveChangesAsync();
         }
     }

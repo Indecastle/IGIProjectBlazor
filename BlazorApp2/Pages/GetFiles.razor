@@ -1,0 +1,85 @@
+﻿@page "/GetFiles/{KeyName}/"
+@inject IS3Service _is3;
+@inject ApplicationContext _db;
+@inject IJSRuntime JsRuntime;
+@inject IMatToaster Toaster
+@implements IDisposable
+
+
+@if (IsTimer)
+{
+    <h2>@Timer.ToString(@"hh\:mm\:ss")</h2>
+    <ChildAmazonGridFiles IsSetFiles="false" Dir="@Dir" IsGetAttachment="@IsGetAttachment" />
+}
+else
+{
+    <h3>Bad Guy</h3>
+}
+
+
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string KeyName { get; set; }
+    FastFile ffile;
+
+    [Parameter]
+    public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
+{
+        { "hidden", "" },
+        { "id", "idfile"}
+    };
+
+    public S3Dir Dir { get; set; }
+    public bool IsGetAttachment { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsTimer = true;
+        ffile = _db.FastFiles.FirstOrDefault(f => f.KeyName == KeyName);
+        if (ffile != null)
+        {
+            Console.WriteLine("############ STEP #1 --- " + ffile.KeyName);
+            string tempRootPath = "TempFiles/" + ffile.KeyName;
+            Dir = new S3Dir(_is3, tempRootPath);
+            await _is3.CreateFolderAsync(tempRootPath);
+
+            await Dir.UpdateDir();
+            StateHasChanged();
+            Console.WriteLine("############ IS AUTHED");
+
+            Timer_Tick();
+        }
+        else
+        {
+            IsTimer = false;
+            Dir = null;
+        }
+    }
+
+    bool IsTimer { get; set; }
+    TimeSpan Timer { get; set; }
+    async Task Timer_Tick()
+    {
+        while (IsTimer && ffile.EndTime > DateTime.Now)
+        {
+            Timer = ffile.EndTime.Subtract(DateTime.Now);
+            StateHasChanged();
+            await Task.Delay(1000);
+        }
+        IsTimer = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        IsTimer = false;
+    }
+}
