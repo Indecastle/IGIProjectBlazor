@@ -17,10 +17,11 @@ namespace BlazorApp2.Data
     public class S3Service : IS3Service
     {
         private readonly IAmazonS3 _client;
-        public string BucketName => "igi-project";
-        public S3Service(IAmazonS3 client)
+        public string BucketName { get; set; }
+        public S3Service(IAmazonS3 client, string bucketName = "igi-project")
         {
             _client = client;
+            BucketName = bucketName;
         }
 
         public async Task CreateBucketAsync(string bucketname)
