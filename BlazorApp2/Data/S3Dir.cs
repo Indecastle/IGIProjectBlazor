@@ -158,6 +158,10 @@ namespace BlazorApp2.Data
 
         }
 
+        public async Task UploadFileAsync(MemoryStream ms, string fileName)
+        {
+            await _is3.UploadObjectAsync(ms, CurrentDir.FullPathName + '/' + fileName);
+        }
         public async Task CreateFolder(string newDirName)
         {
             await _is3.CreateFolderAsync(CurrentDir.FullPathName + '/' + newDirName + '/');

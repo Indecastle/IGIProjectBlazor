@@ -37,6 +37,8 @@ namespace BlazorApp2.Data
                     };
                     var response = await _client.PutBucketAsync(putBucketRequest);
                 }
+                await CreateFolderAsync("Users/");
+                await CreateFolderAsync($"TempFiles/");
             }
             catch (AmazonS3Exception e)
             {
@@ -157,16 +159,16 @@ namespace BlazorApp2.Data
 
         public async Task<IEnumerable<S3Object>> ListFilesAsync(string dirpath)
         {
-            ListObjectsV2Request request = new ListObjectsV2Request
+            ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = BucketName,
                 MaxKeys = 1000,
                 Prefix = dirpath
             };
-            ListObjectsV2Response response;
+            ListObjectsResponse response;
             do
             {
-                response = await _client.ListObjectsV2Async(request);
+                response = await _client.ListObjectsAsync(request);
                 //foreach (S3Object entry in response.S3Objects)
                 //{
                 //    Console.WriteLine("==================== key = {0} size = {1}",
