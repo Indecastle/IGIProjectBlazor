@@ -26,6 +26,8 @@ using Amazon.Extensions.NETCore.Setup;
 using EmbeddedBlazorContent;
 using MatBlazor;
 using BlazorApp2.Services;
+using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace BlazorApp2
 {
@@ -105,7 +107,7 @@ namespace BlazorApp2
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, NotifierService notifier)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, NotifierService notifier, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -127,6 +129,9 @@ namespace BlazorApp2
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEmbeddedBlazorContent(typeof(MatBlazor.BaseMatComponent).Assembly);
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "logger.txt");
+            loggerFactory.AddProvider(new FileLoggerProvider(filePath));
 
             app.UseEndpoints(endpoints =>
             {

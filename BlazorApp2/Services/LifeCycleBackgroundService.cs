@@ -16,13 +16,13 @@ namespace BlazorApp2.Services
     {
         private int counter1, counter2;
         private int executionCount = 0;
-        private readonly ILogger<LifeCycleBackgroundService> _logger;
+        private readonly ILogger _logger;
         private Timer _timer;
         ApplicationContext _db;
         public IServiceProvider Services { get; }
         IS3Service _is3;
 
-        public LifeCycleBackgroundService(IServiceProvider services, IS3Service is3, ILogger<LifeCycleBackgroundService> logger)
+        public LifeCycleBackgroundService(IServiceProvider services, IS3Service is3, ILogger<LifeCycleBackgroundService> logger, ILoggerFactory loggerFactory)
         {
             Services = services;
             _logger = logger;
@@ -35,7 +35,7 @@ namespace BlazorApp2.Services
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Timed Hosted Service running.");
+            _logger.LogError("Timed Hosted Service running.");
 
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
 
@@ -48,8 +48,7 @@ namespace BlazorApp2.Services
             counter1 += 1;
             counter2 += 2;
             Console.WriteLine($"c1: {counter1}, c2: {counter2}");
-            _logger.LogInformation(
-                "Timed Hosted Service is working. Count: {Count}", executionCount);
+            _logger.LogWarning("Timed Hosted Service is working. Count: {Count}", executionCount);
             using (var scope = Services.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
