@@ -17,21 +17,26 @@ namespace BlazorApp2.Data.Tests
     [TestClass()]
     public class S3ServiceTests
     {
-        private const string _bucketName = "igi-project-tests";
+        private const string _bucketName = "igi-project-tests2";
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.EUCentral1;
         private static IAmazonS3 s3Client;
-        IS3Service _s3;
+        private static IS3Service _s3;
         string[] namefiles = new string[] { "TestFolder/",
                                                 "TestFolder/file_1.txt",
                                                 "TestFolder/file_2.jpg",
                                                 "parentfile.kek"};
 
-        [TestInitialize()]
-        public void Setup()
+        [ClassInitialize]
+        public static void StartInit(TestContext context)
         {
             s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
             _s3 = new S3Service(s3Client, _bucketName);
-            _s3.CreateBucketAsync(_bucketName).Wait();
+        }
+
+        [TestInitialize()]
+        public void Setup()
+        {
+            _s3.CreateBucketAsync().Wait();
         }
 
         [TestCleanup()]
@@ -48,13 +53,8 @@ namespace BlazorApp2.Data.Tests
         [TestMethod()]
         public void CreateBucketAsyncTest()
         {
-            if (AmazonS3Util.DoesS3BucketExistAsync(s3Client, _bucketName).Result)
-            {
-                s3Client.DeleteBucketAsync(_bucketName).Wait();
-                Assert.IsTrue(true);
-                return;
-            }
-            Assert.Fail();
+            bool isOk = AmazonS3Util.DoesS3BucketExistAsync(s3Client, _bucketName).Result;
+            Assert.IsTrue(isOk);
         }
 
 
@@ -152,12 +152,45 @@ namespace BlazorApp2.Data.Tests
             _s3.CreateFolderAsync(testDirName).Wait();
 
             var objlist = _s3.ListFilesAsync(testDirName).Result;
-            if(objlist.Count() == 1)
+            if (objlist.Count() == 1)
             {
                 IsOk = true;
             }
 
             Assert.IsTrue(IsOk);
+        }
+
+        [TestMethod()]
+        public void InitBucketAsyncTest()
+        {
+            _s3.InitBucketAsync();
+            ListObjectsRequest request = new ListObjectsRequest
+            {
+                BucketName = _bucketName,
+                MaxKeys = 1000,
+                Prefix = ""
+            };
+            ListObjectsResponse response;
+            response = s3Client.ListObjectsAsync(request).Result;
+            var listObj = response.S3Objects;
+            string[] dirs = new string[] { "TempFiles/", "Users/" };
+            var result = dirs.All(d => listObj.Any(o => o.Key == d));
+            Assert.AreEqual(result, true);
+        }
+
+        [TestMethod()]
+        public void UploadObjectAsyncTest()
+        {
+            _s3.UploadObjectAsync(new MemoryStream(), "kek.KEK");
+            ListObjectsRequest request = new ListObjectsRequest
+            {
+                BucketName = _bucketName,
+                MaxKeys = 1000,
+                Prefix = "kek.KEK"
+            };
+            ListObjectsResponse response = s3Client.ListObjectsAsync(request).Result;
+
+            Assert.IsTrue( response.S3Objects.Any(o => o.Key == "kek.KEK") );
         }
     }
 }

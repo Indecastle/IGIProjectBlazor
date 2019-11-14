@@ -53,7 +53,7 @@
             Dir = new S3Dir(_is3, tempRootPath);
             await _is3.CreateFolderAsync(tempRootPath);
 
-            await Dir.UpdateDir();
+            await Dir.UpdateDirAsync();
             StateHasChanged();
             Console.WriteLine("############ IS AUTHED");
 

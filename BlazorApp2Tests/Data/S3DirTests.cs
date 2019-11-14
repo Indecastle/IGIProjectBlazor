@@ -6,29 +6,36 @@ using System.Text;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Util;
+using System.IO;
+using System.Linq;
+using System.Threading;
 
 namespace BlazorApp2.Data.Tests
 {
     [TestClass()]
     public class S3DirTests
     {
-        private const string _bucketName = "igi-project-tests";
+        private const string _bucketName = "igi-project-tests2";
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.EUCentral1;
         private static IAmazonS3 s3Client;
-        IS3Service _s3;
+        private static IS3Service _s3;
         public S3Dir _s3dir;
         string[] namefiles = new string[] { "TestFolder/",
                                                 "TestFolder/file_1.txt",
                                                 "TestFolder/file_2.jpg",
                                                 "parentfile.kek"};
 
-        [TestInitialize()]
-        public void Setup()
+        [ClassInitialize]
+        public static void StartInit(TestContext context)
         {
             s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
             _s3 = new S3Service(s3Client, _bucketName);
-            _s3.CreateBucketAsync(_bucketName).Wait();
-            _s3dir = new S3Dir(_s3, "");
+        }
+
+        [TestInitialize()]
+        public void Setup()
+        {
+            _s3.CreateBucketAsync().Wait();
         }
 
         [TestCleanup()]
@@ -44,38 +51,111 @@ namespace BlazorApp2.Data.Tests
         [TestMethod()]
         public void S3DirTest_Service_UserName_TypeFile()
         {
-            _s3dir = new S3Dir(_s3, "Lox", S3TypeFile.Files);
-           // pass
+            _s3dir = new S3Dir(_s3, "NoobMaster69", S3TypeFile.Files);
+            Assert.AreEqual(_s3dir.rootPath, "Users/NoobMaster69/Files");
+            Assert.AreEqual(_s3dir.UserName, "NoobMaster69");
+            Assert.AreEqual(_s3dir.IsRoot, true);
+            Assert.AreEqual(_s3dir.Level, 3);
+            Assert.AreEqual(_s3dir.DirStack.Count, 0);
         }
 
         [TestMethod()]
-        public void S3DirTest2()
+        public void S3DirTest_Service_RootPath()
         {
-            Assert.Fail();
+            _s3dir = new S3Dir(_s3, "Test-Folder");
+            Assert.AreEqual(_s3dir.rootPath, "Test-Folder");
+            Assert.AreEqual(_s3dir.UserName, "");
+            Assert.AreEqual(_s3dir.IsRoot, true);
+            Assert.AreEqual(_s3dir.Level, 1);
+            Assert.AreEqual(_s3dir.DirStack.Count, 0);
         }
 
         [TestMethod()]
         public void UpdateDirTest()
         {
-            Assert.Fail();
+            foreach (string filename in namefiles)
+            {
+                _s3.UploadObjectAsync(new MemoryStream(), filename).Wait();
+            }
+
+            _s3dir = new S3Dir(_s3, "");
+            _s3dir.UpdateDirAsync().Wait();
+            Assert.AreEqual(_s3dir.IsRoot, true);
+            Assert.AreEqual(_s3dir.Level, 0);
+            Assert.IsTrue(_s3dir.SubDirs.Any(o => o.Name == "TestFolder"));
+            Assert.IsTrue(_s3dir.S3Objs.Any(o => o.Name == "parentfile.kek"));
         }
 
         [TestMethod()]
         public void SubDirTest()
         {
-            Assert.Fail();
+            foreach (string filename in namefiles)
+            {
+                _s3.UploadObjectAsync(new MemoryStream(), filename).Wait();
+            }
+            _s3dir = new S3Dir(_s3, "");
+            _s3dir.UpdateDirAsync().Wait();
+            _s3dir.SubDirAsync(_s3dir.SubDirs[0]).Wait();
+
+            string[] dirs = new string[] { "file_1.txt", "file_2.jpg" };
+            var isContains = dirs.All(d => _s3dir.S3Objs.Any(o => o.Name == d));
+            Assert.AreEqual(isContains, true);
+            Assert.AreEqual(!_s3dir.SubDirs.Any(), true);
+            Assert.AreEqual(_s3dir.IsRoot, false);
+            Assert.AreEqual(_s3dir.Level, 1);
+            Assert.AreEqual(_s3dir.DirStack.Count, 1);
         }
 
         [TestMethod()]
         public void BackDirTest()
         {
-            Assert.Fail();
+            foreach (string filename in namefiles)
+            {
+                _s3.UploadObjectAsync(new MemoryStream(), filename).Wait();
+            }
+            _s3dir = new S3Dir(_s3, "");
+            _s3dir.UpdateDirAsync().Wait();
+            _s3dir.SubDirAsync(_s3dir.SubDirs[0]).Wait();
+            _s3dir.BackDirAsync(1).Wait();
+
+            Assert.AreEqual(_s3dir.IsRoot, true);
+            Assert.AreEqual(_s3dir.Level, 0);
+            Assert.IsTrue(_s3dir.SubDirs.Any(o => o.Name == "TestFolder"));
+            Assert.IsTrue(_s3dir.S3Objs.Any(o => o.Name == "parentfile.kek"));
+            Assert.AreEqual(_s3dir.DirStack.Count, 0);
         }
 
         [TestMethod()]
         public void CreateFolderTest()
         {
-            Assert.Fail();
+            foreach (string filename in namefiles)
+            {
+                _s3.UploadObjectAsync(new MemoryStream(), filename).Wait();
+            }
+            _s3dir = new S3Dir(_s3, "");
+            _s3dir.UpdateDirAsync().Wait();
+            _s3dir.SubDirAsync(_s3dir.SubDirs[0]).Wait();
+            _s3dir.CreateFolderAsync("NewFolder").Wait();
+            _s3dir.UpdateDirAsync().Wait();
+
+            Assert.AreEqual(_s3dir.SubDirs.Count, 1);
+        }
+
+        [TestMethod()]
+        public void UploadFileAsyncTest()
+        {
+            foreach (string filename in namefiles)
+            {
+                _s3.UploadObjectAsync(new MemoryStream(), filename).Wait();
+            }
+            _s3dir = new S3Dir(_s3, "");
+            _s3dir.UpdateDirAsync().Wait();
+            _s3dir.SubDirAsync(_s3dir.SubDirs[0]).Wait();
+            _s3dir.CreateFolderAsync("NewFolder", true).Wait();
+            _s3dir.SubDirAsync(_s3dir.SubDirs[0]).Wait();
+            _s3dir.UploadFileAsync(new MemoryStream(), "NewFile.KEK", true).Wait();
+
+            Assert.AreEqual(_s3dir.S3Objs.Count, 1);
         }
     }
 }

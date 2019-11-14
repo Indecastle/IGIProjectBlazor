@@ -62,7 +62,7 @@ namespace BlazorApp2.Data
         }
         public S3Dir(IS3Service service, string rootPath)
         {
-            rootLevel = rootPath.Split('/').Length;
+            rootLevel = rootPath == "" ? 0 : rootPath.Split('/').Length;
             _is3 = service;
             UserName = "";
             this.rootPath = rootPath;
@@ -78,7 +78,7 @@ namespace BlazorApp2.Data
             Level = rootLevel;
         }
 
-        public async Task UpdateDir()
+        public async Task UpdateDirAsync()
         {
             SubDirs.Clear();
             S3Objs.Clear();
@@ -124,7 +124,7 @@ namespace BlazorApp2.Data
             //}
         }
 
-        public async Task SubDir(S3DirObject subobj)
+        public async Task SubDirAsync(S3DirObject subobj)
         {
             Level++;
             IsRoot = (Level == rootLevel);
@@ -132,10 +132,10 @@ namespace BlazorApp2.Data
             DirStack.Push(CurrentDir);
             CurrentDir = subobj;
 
-            await UpdateDir();
+            await UpdateDirAsync();
         }
 
-        public async Task BackDir(int level)
+        public async Task BackDirAsync(int level)
         {
             if (!IsRoot)
             {
@@ -144,7 +144,7 @@ namespace BlazorApp2.Data
                     Level--;
                     CurrentDir = DirStack.Pop();
                 }
-                await UpdateDir();
+                await UpdateDirAsync();
             }
             if (Level == rootLevel) // IsRoot
             {
@@ -158,14 +158,17 @@ namespace BlazorApp2.Data
 
         }
 
-        public async Task UploadFileAsync(MemoryStream ms, string fileName)
+        public async Task UploadFileAsync(MemoryStream ms, string fileName, bool upload = false)
         {
             await _is3.UploadObjectAsync(ms, CurrentDir.FullPathName + '/' + fileName);
+            if (upload)
+                await UpdateDirAsync();
         }
-        public async Task CreateFolder(string newDirName)
+        public async Task CreateFolderAsync(string newDirName, bool upload = false)
         {
             await _is3.CreateFolderAsync(CurrentDir.FullPathName + '/' + newDirName + '/');
-
+            if (upload)
+                await UpdateDirAsync();
         }
     }
 

@@ -312,7 +312,7 @@
             await file.Data.CopyToAsync(ms);
             ms.Seek(0, SeekOrigin.Begin);
             await Dir.UploadFileAsync(ms, file.Name);
-            await Dir.UpdateDir();
+            await Dir.UpdateDirAsync();
             curPage = 1;
             updateList(curPage);
             ShowToast(MatToastType.Success, $"File \"{file.Name}\" is Added");
@@ -330,7 +330,7 @@
             Console.WriteLine("############ STEP #1");
             Dir = new S3Dir(_is3, userName, S3TypeFile.Files);
             //Dir = new S3Dir(_is3, $"Users/{userName}/Files");
-            await Dir.UpdateDir();
+            await Dir.UpdateDirAsync();
             Console.WriteLine("############ IS AUTHED");
         }
         else
@@ -342,7 +342,7 @@
     public async Task GoToSubDir(S3DirObject obj)
     {
         Dir.IsUpdating = true;
-        await Dir.SubDir(obj);
+        await Dir.SubDirAsync(obj);
         Dir.IsUpdating = false;
         curPage = 1;
         updateList(curPage);
@@ -351,7 +351,7 @@
     public async Task GoToBackDir(int level)
     {
         Dir.IsUpdating = true;
-        await Dir.BackDir(level);
+        await Dir.BackDirAsync(level);
         Dir.IsUpdating = false;
         curPage = 1;
         updateList(curPage);
@@ -362,7 +362,7 @@
         await Task.Run(async () =>
         {
             await _is3.DeleteFilesAsync((e.Data as IS3Object)?.FullPathName);
-            await Dir.UpdateDir();
+            await Dir.UpdateDirAsync();
         });
 
         curPage = 1;
@@ -373,8 +373,8 @@
     public async Task CreateFolder(MouseEventArgs e)
     {
         dialogIsOpen = false;
-        await Dir.CreateFolder(dialogTextField);
-        await Dir.UpdateDir();
+        await Dir.CreateFolderAsync(dialogTextField);
+        await Dir.UpdateDirAsync();
         curPage = 1;
         updateList(curPage);
         ShowToast(MatToastType.Success, $"Folder \"{dialogTextField}\" is Added" );

@@ -279,7 +279,7 @@
     public async Task GoToSubDir(S3DirObject obj)
     {
         Dir.IsUpdating = true;
-        await Dir.SubDir(obj);
+        await Dir.SubDirAsync(obj);
         Dir.IsUpdating = false;
         curPage = 1;
         updateList(curPage);
@@ -288,7 +288,7 @@
     public async Task GoToBackDir(int level)
     {
         Dir.IsUpdating = true;
-        await Dir.BackDir(level);
+        await Dir.BackDirAsync(level);
         Dir.IsUpdating = false;
         curPage = 1;
         updateList(curPage);
@@ -299,7 +299,7 @@
         await Task.Run(async () =>
         {
             await _is3.DeleteFilesAsync((e.Data as IS3Object)?.FullPathName);
-            await Dir.UpdateDir();
+            await Dir.UpdateDirAsync();
         });
 
         curPage = 1;
@@ -311,8 +311,8 @@
     {
         await EventNewFolder();
         await DialogIsOpenChanged.InvokeAsync(false);
-        await Dir.CreateFolder(dialogTextField);
-        await Dir.UpdateDir();
+        await Dir.CreateFolderAsync(dialogTextField);
+        await Dir.UpdateDirAsync();
         curPage = 1;
         updateList(curPage);
         ShowToast(MatToastType.Success, $"Folder \"{dialogTextField}\" is Added" );

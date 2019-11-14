@@ -24,21 +24,20 @@ namespace BlazorApp2.Data
             BucketName = bucketName;
         }
 
-        public async Task CreateBucketAsync(string bucketname)
+        public async Task CreateBucketAsync()
         {
             try
             {
-                if (await AmazonS3Util.DoesS3BucketExistAsync(_client, bucketname) == false)
+                if (await AmazonS3Util.DoesS3BucketExistAsync(_client, BucketName) == false)
                 {
                     var putBucketRequest = new PutBucketRequest
                     {
-                        BucketName = bucketname,
+                        BucketName = BucketName,
                         UseClientRegion = true
                     };
                     var response = await _client.PutBucketAsync(putBucketRequest);
                 }
-                await CreateFolderAsync("Users/");
-                await CreateFolderAsync($"TempFiles/");
+                
             }
             catch (AmazonS3Exception e)
             {
@@ -49,6 +48,12 @@ namespace BlazorApp2.Data
             {
                 Console.WriteLine(e);
             }
+        }
+
+        public async Task InitBucketAsync()
+        {
+            await CreateFolderAsync("Users/");
+            await CreateFolderAsync("TempFiles/");
         }
 
         public async Task CreateUserAsync(string username)

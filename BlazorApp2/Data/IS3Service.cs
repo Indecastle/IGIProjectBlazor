@@ -9,12 +9,14 @@ namespace BlazorApp2.Data
 {
     public interface IS3Service
     {
-        Task CreateBucketAsync(string bucketname);
+        Task CreateBucketAsync();
+        Task InitBucketAsync();
         Task CreateUserAsync(string username);
         Task CreateFolderAsync(string newDirPath);
         Task UploadObjectAsync(Stream stream, string pathObject);
         Task DeleteFilesAsync(string fullPathName);
         Task<IEnumerable<S3Object>> ListFilesAsync(string dirpath);
         string GeneratePreSignedURL(string filepath, bool attachment, string fileName = null);
+
     }
 }
