@@ -14,6 +14,13 @@
         <SubMenu>
             <Item OnClick="@OnClick">Submenu Item 1</Item>
             <Item OnClick="@OnClick">Submenu Item 2</Item>
+            <div class="alert alert-success" role="alert">
+                <strong>Well done!</strong> Good Boy!
+            </div>
+            <div class="alert alert-info" role="alert">
+                <strong>XXX Link!</strong>
+                <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+            </div>
         </SubMenu>
     </Item>
 </ContextMenu>
@@ -21,6 +28,13 @@
 <ContextMenu Id="myBackmenu" AutoHide="true" Animation="Animation.Zoom" CssClass="my_contextmenu">
     <Item OnClick="@(() => dialogIsOpen=true)"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>
     <Item OnClick="@OpenDialog"> <i class="fas fa-trash-alt red-icon"></i> Add File </Item>
+    <div class="alert alert-success" role="alert">
+        <strong>Well done!</strong> Good Boy!
+    </div>
+    <div class="alert alert-info" role="alert">
+        <strong>XXX Link!</strong>
+        <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+    </div>
 </ContextMenu>
 
 <MatDialog @bind-IsOpen="@dialogIsOpen" CanBeClosed="false" Class="my_contextmenu">
@@ -33,6 +47,13 @@
         <MatButton OnClick="@(e => { dialogIsOpen = false; })">No Thanks</MatButton>
         <MatButton OnClick="@CreateFolder">OK</MatButton>
     </MatDialogActions>
+    <div class="alert alert-success" role="alert">
+        <strong>Well done!</strong> Good Boy!
+    </div>
+    <div class="alert alert-info" role="alert">
+        <strong>XXX Link!</strong>
+        <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+    </div>
 </MatDialog>
 
 
@@ -53,8 +74,8 @@
     <div class="my_sidebar__navigation">
         <div class="my_navigation__scroll">
             <div class="my_navigation__items_standard">
-                <MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
-                <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>
+                @*<MatButton OnClick="@(e => { dialogIsOpen = false; })">Мои файлы</MatButton>
+                <MatButton OnClick="@(e => { dialogIsOpen = false; })">Не мои файлы</MatButton>*@
                 <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })">
                 </MatIconButton>
                 <span>preview: @IsGetAttachment</span>
@@ -97,7 +118,7 @@
                         {
                             int j = i;
                             <div class="myinlineblock" @onclick="@(async e => await GoToBackDir(j))">@folder.Name</div>
-                            <div class="myinlineblock"><i class="fas fa-chevron-right"></i></div>
+                            <div class="myinlineblock_Right"><i class="fas fa-chevron-right"></i></div>
                             i--;
                         }
                         <div class="myinlineblock">@Dir.CurrentDir.Name</div>

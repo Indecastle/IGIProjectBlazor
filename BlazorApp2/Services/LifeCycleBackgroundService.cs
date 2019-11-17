@@ -25,6 +25,7 @@ namespace BlazorApp2.Services
         public LifeCycleBackgroundService(IServiceProvider services, IS3Service is3, ILogger<LifeCycleBackgroundService> logger, ILoggerFactory loggerFactory)
         {
             Services = services;
+            //_logger = loggerFactory.CreateLogger("FileLogger");
             _logger = logger;
             using (var scope = Services.CreateScope())
             {
@@ -35,9 +36,9 @@ namespace BlazorApp2.Services
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            _logger.LogError("Timed Hosted Service running.");
-
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+
+            _logger.LogInformation("Timed Hosted Service running.#########################");
 
             return Task.CompletedTask;
         }
@@ -47,8 +48,15 @@ namespace BlazorApp2.Services
             executionCount++;
             counter1 += 1;
             counter2 += 2;
-            Console.WriteLine($"c1: {counter1}, c2: {counter2}");
-            _logger.LogWarning("Timed Hosted Service is working. Count: {Count}", executionCount);
+            //Console.WriteLine($"c1: {counter1}, c2: {counter2}");
+            //_logger.LogTrace("Trace: Timed Hosted Service...");
+            //_logger.LogDebug("Debug: Timed Hosted Service...");
+            //_logger.LogInformation(new EventId(12345), "Information: Timed Hosted Service...");
+            //_logger.LogWarning(new Exception("Hello World"), "Warning: Timed Hosted Service is working. Count: {Count}", executionCount);
+            //_logger.LogError("Error: Timed Hosted Service...");
+            //_logger.LogCritical("Critical: Timed Hosted Service...");
+
+            _logger.LogDebug( "Timed Hosted Service is working. Count: {Count}", executionCount);
             using (var scope = Services.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
@@ -65,11 +73,11 @@ namespace BlazorApp2.Services
                         }
                         catch (AmazonS3Exception e)
                         {
-                            Console.WriteLine("Error encountered on server. Message: '{0}' when writing an object", e.Message);
+                            _logger.LogError("Error encountered on server. Message: '{0}' when writing an object", e.Message);
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Unknown Exception {0}", e.Message);
+                            _logger.LogError("Unknown Exception {0}", e.Message);
                             throw;
                         }
                     }

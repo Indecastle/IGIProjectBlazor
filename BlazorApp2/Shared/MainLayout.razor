@@ -1,69 +1,72 @@
 ﻿@inherits LayoutComponentBase
 @*<app>
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <div class="main">
-        <div class="top-row px-4">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/en-us/aspnet/" target="_blank">About</a>
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <div class="content px-4">
-            @Body
+        <div class="main">
+            <div class="top-row px-4">
+                <LoginDisplay />
+                <a href="https://docs.microsoft.com/en-us/aspnet/" target="_blank">About</a>
+            </div>
+
+            <div class="content px-4">
+                @Body
+            </div>
         </div>
-    </div>
-</app>*@
-
-    <MatAppBarContainer>
-        <MatThemeProvider Theme="@theme1">
-            <MatAppBar Fixed="true">
-                <MatAppBarRow>
-                    <MatAppBarSection>
-                        <MatIconButton Icon="menu" OnClick="@((e) => ButtonClicked())"></MatIconButton>
-                        <MatAppBarTitle>MatBlazor - Material Design components for Blazor</MatAppBarTitle>
-                    </MatAppBarSection>
-                    <MatAppBarSection Align="@MatAppBarSectionAlign.End">
-                        <MatAppBarTitle><LoginDisplay /></MatAppBarTitle>
+    </app>*@
 
 
-                        <MatIconButton Icon="favorite"></MatIconButton>
-                    </MatAppBarSection>
-                </MatAppBarRow>
-            </MatAppBar>
-        </MatThemeProvider>
 
-            <MatAppBarContent>
 
-                <MatDrawerContainer>
-                    <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal" Style="z-index: 100;">
-                        <div class="sidebar" style="width: 100%">
-                            <NavMenu @bind-SideBar="Opened" />
-                        </div>
-                    </MatDrawer>
-                    <MatThemeProvider Theme="@theme1">
-                        <MatDrawerContent Class="my_bodystyle">
-                            @Body
-                        </MatDrawerContent>
-                    </MatThemeProvider>
-                </MatDrawerContainer>
+<MatAppBarContainer>
+    <MatThemeProvider Theme="@theme1">
+        <MatAppBar Fixed="true">
+            <MatAppBarRow>
+                <MatAppBarSection>
+                    <MatIconButton Icon="menu" OnClick="@((e) => ButtonClicked())"></MatIconButton>
+                    <MatAppBarTitle>Amazon S3</MatAppBarTitle>
+                </MatAppBarSection>
+                <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                    <MatAppBarTitle><LoginDisplay /></MatAppBarTitle>
+                </MatAppBarSection>
+            </MatAppBarRow>
+        </MatAppBar>
+    </MatThemeProvider>
 
-            </MatAppBarContent>
-    </MatAppBarContainer>
+    <MatAppBarContent>
 
-        @code
+        <MatDrawerContainer>
+            <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal" Style="z-index: 100;">
+                <div class="sidebar" style="width: 100%">
+                    <NavMenu @bind-SideBar="Opened" />
+                </div>
+            </MatDrawer>
+            <MatThemeProvider Theme="@theme1">
+                <MatDrawerContent Class="my_bodystyle">
+                    @Body
+                </MatDrawerContent>
+            </MatThemeProvider>
+        </MatDrawerContainer>
+
+    </MatAppBarContent>
+</MatAppBarContainer>
+
+@code
 {
-            bool Opened = false;
+    [Parameter]
+    public bool Opened { get; set; } = false;
 
-            void ButtonClicked()
-            {
-                Opened = !Opened;
-            }
+    void ButtonClicked()
+    {
+        Opened = !Opened;
+    }
 
-            MatTheme theme1 = new MatTheme()
-            {
-                Primary = "#4a148c",
-                Secondary = "#6a1b9a"
-            };
-        }
+
+
+    MatTheme theme1 = new MatTheme()
+    {
+        Primary = "#4a148c",
+        Secondary = "#6a1b9a"
+    };
+}

@@ -16,12 +16,12 @@
     <div class="my_sidebar__navigation">
         <div class="my_navigation__scroll">
             <div class="my_navigation__items_standard">
-                <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" ondblclick="myFunction('staticUrl')">
-                <MatButton Link="@UrlShared">Перейти</MatButton>
-                <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })">
-                </MatIconButton>
+                <MatButton Link="@UrlShared" >Перейти</MatButton>
+                <br />
+                <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })"></MatIconButton>
                 <span>preview: @IsGetAttachment</span>
                 <strong> @(IsTimer ? Timer.ToString(@"hh\:mm\:ss") : "")</strong>
+                <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" ondblclick="myFunction('staticUrl')">
             </div>
         </div>
     </div>

@@ -1,5 +1,9 @@
 ﻿@page "/cm/contextmenu"
 @inject IBlazorContextMenuService blazorContextMenuService
+@inject IJSRuntime JsRuntime;
+@using Newtonsoft.Json;
+@using System.Text.Json;
+
 <form class="form-inline">
     <label class="sr-only" for="xInput">Location (X)</label>
     <div class="input-group mb-2 mr-sm-2">
@@ -25,36 +29,85 @@
     </div>
 </form>
 
-<div class="btn-group">
-    <button @onclick="ShowBtnClick" class="btn btn-info">Show the context menu</button>
+<div class="btn-group stopprop" >
+    <button @onclick="ShowBtnClick" @onclick:stopPropagation="true" class="btn btn-info">Show the context menu</button>
     <button @onclick="HideBtnClick" class="btn btn-info">Hide the context menu</button>
+    <button @onclick="ShowBtnClick2" class="btn btn-primary">azaz</button>
+    <button @ref="divElement" @onclick="ShowBtnClick3" @onclick:stopPropagation="true" class="btn btn-primary">toggle</button>
+    <p>@IsShowing</p>
 </div>
 
-<ContextMenu Id="manualTriggerMenu" CssClass="z-10" AutoHide="autoHide">
+<ContextMenu Id="manualTriggerMenu2" CssClass="z-10" AutoHide="autoHide" Animation="Animation.Grow" OnHiding="@(e => { IsShowing = false; })" OnAppearing="@(e => { IsShowing = true; })">
     <Item OnClick="@OnClick">Item 1</Item>
     <Item OnClick="@OnClick">Item 2</Item>
     <Item OnClick="@OnClick">Item 3</Item>
+    <div class="alert alert-success" role="alert">
+        <strong>Well done!</strong> Good Boy!
+    </div>
+    <div class="alert alert-info" role="alert">
+        <strong>XXX Link!</strong>
+        <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+    </div>
     <Item OnClick="@OnClick">Item 4</Item>
     <Item OnClick="@OnClick">Item 5</Item>
 </ContextMenu>
 
 @code {
-
+    private ElementReference divElement;
     private int x = 800;
     private int y = 600;
     private bool autoHide;
+    private bool IsShowing;
     async Task ShowBtnClick()
     {
-        await blazorContextMenuService.ShowMenu("manualTriggerMenu", x, y);
+        await blazorContextMenuService.ShowMenu("manualTriggerMenu2", x, y);
+
+    }
+    async Task ShowBtnClick2(MouseEventArgs e)
+    {
+        object obj = await JsRuntime.InvokeAsync<object>("my_getTopRight", divElement);
+        var json = ((JsonElement)obj).GetRawText();
+        int[] arr = JsonConvert.DeserializeObject<double[]>(json).Select(x => (int)x).ToArray();
+        Console.WriteLine((JsonElement)obj);
+        Console.WriteLine($"x: {arr[0]}, y: {arr[1]}");
+        await blazorContextMenuService.ShowMenu("manualTriggerMenu2", arr[0], arr[1]);
+        //Console.WriteLine($"x: {(int)array[0]}, y: {(int)array[1]}");
     }
     async Task HideBtnClick()
     {
-        await blazorContextMenuService.HideMenu("manualTriggerMenu");
+        await blazorContextMenuService.HideMenu("manualTriggerMenu2");
+    }
+    async Task ShowBtnClick3()
+    {
+        IsShowing = !IsShowing;
+        object obj = await JsRuntime.InvokeAsync<object>("my_getTopRight", divElement);
+        var json = ((JsonElement)obj).GetRawText();
+        int[] arr = JsonConvert.DeserializeObject<double[]>(json).Select(x => (int)x).ToArray();
+        if(IsShowing)
+            await blazorContextMenuService.ShowMenu("manualTriggerMenu2", arr[0]+100, arr[1]);
+        else
+            await blazorContextMenuService.HideMenu("manualTriggerMenu2");
+        
     }
 
     void OnClick(ItemClickEventArgs e)
     {
         Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, MenuTarget: {e.ContextMenuTargetId}, " +
             $"IsCanceled: {e.IsCanceled}, MenuItem: {e.MenuItemElement}, MouseEvent: {e.MouseEvent}");
+    }
+
+    public async Task GetGenUrl()
+    {
+        //Dictionary<string, int> azaz = await JsRuntime.InvokeAsync<Dictionary<string, int>>("my_getTopRight");
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeAsync<object>("onafterrender");
+        }
+        //await JsRuntime.InvokeAsync<object>("console.log", "onAfterRender");
     }
 }

@@ -10,10 +10,13 @@ namespace BlazorApp2.Services
     public class FileLogger : ILogger
     {
         private string filePath;
+        private string _category;
         private static object _lock = new object();
-        public FileLogger(string path)
+        public FileLogger(string category, string path)
         {
-            filePath = path;
+            //filePath = path;
+            filePath = Path.Combine(Directory.GetCurrentDirectory(), "logger.log");
+            _category = category;
         }
         public IDisposable BeginScope<TState>(TState state)
         {
@@ -22,17 +25,22 @@ namespace BlazorApp2.Services
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            //return logLevel == LogLevel.Trace;
-            return true;
+            //if(_category == "FileLogger" )
+            if ((int)logLevel >= 1)
+                return true;
+            return false;
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if (formatter != null)
+            if (formatter != null && IsEnabled(logLevel))
             {
                 lock (_lock)
                 {
-                    File.AppendAllText(filePath, formatter(state, exception) + Environment.NewLine);
+                    File.AppendAllText(filePath, $"{logLevel.ToString()}: {_category}[{eventId.Id}] \r\n    "
+                        + formatter(state, exception) + Environment.NewLine);
+                    //File.AppendAllText(filePath, $"EventId: {eventId.Id} || EventName: {eventId.Name} || LogLevel: {logLevel.ToString()} || Category: {_category} && " 
+                    //    + formatter(state, exception) + Environment.NewLine);
                 }
             }
         }
@@ -47,7 +55,7 @@ namespace BlazorApp2.Services
         }
         public ILogger CreateLogger(string categoryName)
         {
-            return new FileLogger(path);
+            return new FileLogger(categoryName, path);
         }
 
         public void Dispose()

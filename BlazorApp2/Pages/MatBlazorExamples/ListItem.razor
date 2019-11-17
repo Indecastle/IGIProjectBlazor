@@ -4,10 +4,21 @@
 <p>
     <MatButton Label="Menu" OnClick="@OnClick" RefBack="@buttonForwardRef"></MatButton>
     <MatMenu @ref="Menu" TargetForwardRef="@buttonForwardRef">
+        <div>
+            <div class="alert alert-success" role="alert">
+                <strong>Well done!</strong> Good Boy!
+            </div>
+            <div class="alert alert-info" role="alert">
+                <strong>XXX Link!</strong>
+                <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+            </div>
+        </div>
+        
         <MatList>
             <MatListItem>Item 1</MatListItem>
             <MatListItem>Item 2</MatListItem>
             <MatListItem>Item 3</MatListItem>
+
             <MatListItem>Item 4</MatListItem>
             <MatListItem>Item 5</MatListItem>
         </MatList>

@@ -1,4 +1,4 @@
-﻿label.my_btn {
+﻿.my_btn {
     background: #f15d22;
     border: none;
     border-radius: 5px;
@@ -16,13 +16,14 @@
     vertical-align: middle;
     line-height: inherit;
     box-shadow: -1px 1px 5px rgba(0,0,0,.2);
+    text-decoration: none;
 }
 
-    label.my_btn:hover {
+    .my_btn:hover {
         background-color: #d15725;
     }
 
-    label.my_btn.my_btn-20 {
+    .my_btn.my_btn-20 {
         background-color: #fc0;
         border-radius: 3px;
         overflow: hidden;
@@ -33,7 +34,7 @@
         color: #000;
     }
 
-        label.my_btn.my_btn-20 span {
+        .my_btn.my_btn-20 span {
             display: inline-block;
             height: 100%;
             transition: all 0.3s;
@@ -44,7 +45,7 @@
             line-height: 0.4;
         }
 
-        label.my_btn.my_btn-20::before {
+        .my_btn.my_btn-20::before {
             color: #000;
             font-family: 'Font Awesome 5 Free';
             content: "\f382";
@@ -58,16 +59,16 @@
             transition: all 0.3s;
         }
 
-        label.my_btn.my_btn-20:hover {
+        .my_btn.my_btn-20:hover {
             background-color: #f2c200;
         }
 
-            label.my_btn.my_btn-20:hover::before {
+            .my_btn.my_btn-20:hover::before {
                 right: 78%;
             }
 
 
-    label.my_btn.my_btn-20_2 {
+    .my_btn.my_btn-20_2 {
         background-color: #fff;
         border-radius: 3px;
         overflow: hidden;
@@ -78,7 +79,7 @@
         color: #000;
     }
 
-        label.my_btn.my_btn-20_2 span {
+        .my_btn.my_btn-20_2 span {
             display: inline-block;
             height: 100%;
             transition: all 0.3s;
@@ -89,7 +90,7 @@
             line-height: 0.4;
         }
 
-        label.my_btn.my_btn-20_2::before {
+        .my_btn.my_btn-20_2::before {
             color: #000;
             font-family: 'Font Awesome 5 Free';
             content: "\f055";
@@ -103,18 +104,18 @@
             transition: all 0.3s;
         }
 
-        label.my_btn.my_btn-20_2:hover {
+        .my_btn.my_btn-20_2:hover {
             background-color: rgb(245,245,245);
         }
 
-            label.my_btn.my_btn-20_2:hover::before {
+            .my_btn.my_btn-20_2:hover::before {
                 right: 78%;
             }
 
 
 
 
-    label.my_btn.my_btn-20_20 {
+    .my_btn.my_btn-20_20 {
         background-color: #fff;
         border-radius: 3px;
         overflow: hidden;
@@ -126,7 +127,7 @@
         padding: 1rem 0px;
     }
 
-        label.my_btn.my_btn-20_20 span {
+        .my_btn.my_btn-20_20 span {
             display: inline-block;
             height: 100%;
             transition: all 0.3s;
@@ -137,9 +138,47 @@
             line-height: 0.4;
         }
 
-        label.my_btn.my_btn-20_20:hover {
-            background-color: rgb(245,245,245);
+        .my_btn.my_btn-20_20:hover {
+            background-color: rgb(240,240,240);
         }
+
+
+    .my_btn.my_btn-20_30 {
+        background-color: #fff;
+        border-radius: 3px;
+        overflow: hidden;
+        height: 40px;
+        width: auto;
+        font-size: 15px;
+        font-weight: 500;
+        color: #3c4043;
+        padding: 10px 24px;
+        margin: 16px;
+        text-decoration: none;
+    }
+
+        .my_btn.my_btn-20_30 span {
+            display: inline-block;
+            height: 100%;
+            transition: all 0.3s;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            font-size: 19px;
+            line-height: 0.4;
+        }
+
+        .my_btn.my_btn-20_30:hover {
+            background-color: rgb(240,240,240);
+        }
+
+
+
+
+
+
+
+
 
 
 

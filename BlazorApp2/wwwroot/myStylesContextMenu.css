@@ -1,0 +1,92 @@
+﻿.my_context_menu {
+    width: 356px;
+    height: 280px;
+    /*top: 70px !important;*/
+}
+
+.my_gb_4a {
+    margin: 20px 33px;
+}
+.my_gb_Ab {
+    border-bottom: 1px solid #e8eaed;
+    border-top: 1px solid #e8eaed;
+    padding: 0 17px;
+    text-align: center;
+}
+.my_gb_ob {
+    color: #5f6368;
+    margin: 14px 33px;
+    text-align: center;
+    white-space: normal;
+    display: grid;
+}
+.my_gb_pb {
+    border-radius: 4px;
+    color: #5f6368;
+    display: inline-block;
+    font: 400 12px/16px Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    outline: 0;
+    padding: 4px 8px;
+    margin: 0 auto;
+    text-decoration: none;
+    text-align: center;
+    white-space: normal;
+    text-decoration: none;
+    cursor: pointer;
+}
+    .my_gb_pb:hover {
+        color: #1e1f21;
+        text-decoration: none;
+    }
+.my_gb_hb {
+    color: #202124;
+    font: 500 16px/22px Google Sans,Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    letter-spacing: .29px;
+    margin: 0;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+
+.my_cm_button {
+    width: 100%;
+    height: 50px;
+    background: #f15d22;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-size: inherit;
+    font-weight: 600;
+    outline: none;
+    padding: 1rem 50px;
+    position: relative;
+    transition: all 0.3s;
+    text-align: center;
+    vertical-align: middle;
+    line-height: inherit;
+    box-shadow: -1px 1px 5px rgba(0,0,0,.2);
+}
+
+.my_btn.my_btn-20_20.my_btn_kek {
+    border: 1px solid #dadce0;
+    border-radius: 100px;
+    color: #3c4043;
+    display: inline-block;
+    letter-spacing: .25px;
+    margin: 10px 35px;
+    max-width: 220px;
+    outline: 0;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+    .my_btn.my_btn-20_20.my_btn_kek span {
+        font: 500 14px/16px Google Sans,Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    }

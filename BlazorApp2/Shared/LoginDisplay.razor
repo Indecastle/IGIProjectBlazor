@@ -1,12 +1,26 @@
-﻿<AuthorizeView>
+﻿
+
+<AuthorizeView>
     <Authorized>
-        <a href="/Auth/Account/Manage/" class="text-white">Hello, @context.User.Identity.Name!</a>
-        <a class="ml-md-auto btn btn-primary"
-           href="/Auth/Account/logOut?returnUrl=/"
-           target="_top">Logout</a>
+        <MatMenu @ref="Menu" TargetForwardRef="@buttonForwardRef" Class="my_context_menu">
+            <div class="my_gb_4a">
+                <div class="my_gb_hb">@context.User.Identity.Name</div>
+                <a href="/Auth/Account/Manage/" class="my_btn my_btn-20_20 my_btn_kek"><span>Управление аккаунтом IGI</span></a>
+            </div>
+            <div class="my_gb_Ab">
+                <a class="my_btn my_btn-20_30"
+                   href="/Auth/Account/logOut?returnUrl=/"
+                   target="_top">Выйти</a>
+            </div>
+            <div class="my_gb_ob">
+                <a class="my_gb_pb" target="_top">Политика конфиденциальности</a>
+                <a class="my_gb_pb" target="_top">Условия использования</a>
+            </div>
+        </MatMenu>
+        <MatIconButton Icon="favorite" OnClick="@OnOpenMenu" RefBack="@buttonForwardRef"></MatIconButton>
     </Authorized>
     <NotAuthorized>
-        <form action="/Auth/Account/LoginFast" method="post" class="form-inline">
+        @*<form action="/Auth/Account/LoginFast" method="post" class="form-inline">
             <div class="form-group mb-2">
                 <input type="text" class="form-control" placeholder="User Name" id="Username" name="Username" />
             </div>
@@ -14,7 +28,10 @@
                 <input type="Password" class="form-control" placeholder="Password" id="Password" name="Password" />
             </div>
                 <input type="submit" class="btn btn-primary mb-2" value="Войти"/>
-        </form>
+        </form>*@
+        <a class="ml-md-auto btn btn-primary"
+           href="/Auth/Account/Login"
+           target="_top">Войти</a>
         @*<input type="text"
                placeholder="User Name"
                @bind="@Username" />
@@ -28,6 +45,13 @@
     </NotAuthorized>
 </AuthorizeView>
 @code {
+    ForwardRef buttonForwardRef = new ForwardRef();
+    BaseMatMenu Menu;
     string Username = "";
     string Password = "";
+
+    public void OnOpenMenu(MouseEventArgs e)
+    {
+        this.Menu.OpenAsync();
+    }
 }

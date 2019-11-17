@@ -11,12 +11,14 @@ using Amazon.S3.Model;
 using System.IO;
 using Amazon.S3.Transfer;
 using System.Net.Http;
+using Microsoft.Extensions.Logging;
 
 namespace BlazorApp2.Data.Tests
 {
     [TestClass()]
     public class S3ServiceTests
     {
+        private static readonly Logger<S3Service> _logger = new Logger<S3Service>(new LoggerFactory());
         private const string _bucketName = "igi-project-tests2";
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.EUCentral1;
         private static IAmazonS3 s3Client;
@@ -30,7 +32,7 @@ namespace BlazorApp2.Data.Tests
         public static void StartInit(TestContext context)
         {
             s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
-            _s3 = new S3Service(s3Client, _bucketName);
+            _s3 = new S3Service(s3Client, _logger, _bucketName);
         }
 
         [TestInitialize()]

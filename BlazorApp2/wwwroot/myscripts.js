@@ -46,6 +46,14 @@ function my_opendialog(id_name) {
 }
 
 
+function my_getTopRight(element) {
+    var rect = element.getBoundingClientRect();
+    //alert("x: " + rect.right + " y: " + rect.top)
+    return [ rect.right, rect.top ];
+}
+
+
+
 
 
 

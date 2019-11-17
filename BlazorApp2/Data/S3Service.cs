@@ -4,6 +4,7 @@ using Amazon.S3.Transfer;
 using Amazon.S3.Util;
 using BlazorApp2.Models;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,10 +17,12 @@ namespace BlazorApp2.Data
 {
     public class S3Service : IS3Service
     {
+        private readonly ILogger _logger;
         private readonly IAmazonS3 _client;
-        public string BucketName { get; set; }
-        public S3Service(IAmazonS3 client, string bucketName = "igi-project")
+        public string BucketName { get; private set; }
+        public S3Service(IAmazonS3 client, ILogger<S3Service> logger, string bucketName = "igi-project")
         {
+            _logger = logger;
             _client = client;
             BucketName = bucketName;
         }
@@ -36,17 +39,19 @@ namespace BlazorApp2.Data
                         UseClientRegion = true
                     };
                     var response = await _client.PutBucketAsync(putBucketRequest);
+                    _logger.LogInformation("Created Bucket - BucketName: {0}", BucketName);
                 }
-                
+                else
+                    _logger.LogInformation("Bucket is exist - BucketName: {0}", BucketName);
             }
             catch (AmazonS3Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogInformation(e.Message);
                 throw;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogInformation(e.Message);
             }
         }
 
@@ -90,26 +95,26 @@ namespace BlazorApp2.Data
                 try
                 {
                     DeleteObjectsResponse response = await _client.DeleteObjectsAsync(multiObjectDeleteRequest);
-                    Console.WriteLine("Successfully deleted all the {0} items", response.DeletedObjects.Count);
+                    _logger.LogInformation("Successfully deleted all the {0} items", response.DeletedObjects.Count);
                 }
                 catch (DeleteObjectsException e)
                 {
-                    PrintDeletionErrorStatus(e);
+                    PrintDeletionErrorStatus(_logger, e);
                 }
             }
             
         }
 
-        private static void PrintDeletionErrorStatus(DeleteObjectsException e)
+        private static void PrintDeletionErrorStatus(ILogger _logger, DeleteObjectsException e)
         {
             // var errorResponse = e.ErrorResponse;
             DeleteObjectsResponse errorResponse = e.Response;
-            Console.WriteLine("x {0}", errorResponse.DeletedObjects.Count);
+            _logger.LogError("x {0}", errorResponse.DeletedObjects.Count);
 
-            Console.WriteLine("No. of objects successfully deleted = {0}", errorResponse.DeletedObjects.Count);
-            Console.WriteLine("No. of objects failed to delete = {0}", errorResponse.DeleteErrors.Count);
+            _logger.LogError("No. of objects successfully deleted = {0}" + Environment.NewLine +
+                            "No. of objects failed to delete = {1}" + Environment.NewLine + "Printing error data...", 
+                            errorResponse.DeletedObjects.Count, errorResponse.DeleteErrors.Count);
 
-            Console.WriteLine("Printing error data...");
             foreach (DeleteError deleteError in errorResponse.DeleteErrors)
             {
                 Console.WriteLine("Object Key: {0}\t{1}\t{2}", deleteError.Key, deleteError.Code, deleteError.Message);
@@ -150,14 +155,18 @@ namespace BlazorApp2.Data
                 //var user = authState.User;
                 var fileTransferUtility = new TransferUtility(_client);
                 await fileTransferUtility.UploadAsync(stream, BucketName, pathObject);
+                if(pathObject[pathObject.Length-1] == '/')
+                    _logger.LogInformation("Uploaded Folder in Bucket: {0}, PathDir: {1}", BucketName, pathObject);
+                else
+                    _logger.LogInformation("Uploaded object in Bucket: {0}, PathObject: {1}", BucketName, pathObject);
             }
             catch (AmazonS3Exception e)
             {
-                Console.WriteLine("Error encountered on server. Message: '{0}' when writing an object", e.Message);
+                _logger.LogError("Error encountered on server. Message: '{0}' when writing an object", e.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Unknown Exception {0}", e.Message);
+                _logger.LogError("Unknown Exception {0}", e.Message);
                 throw;
             }
         }
@@ -179,6 +188,7 @@ namespace BlazorApp2.Data
                 //    Console.WriteLine("==================== key = {0} size = {1}",
                 //        entry.Key, entry.Size);
                 //}
+                _logger.LogInformation("List-Objects - Count: {}", response.S3Objects.Count);
                 return response.S3Objects;
             } while (response.IsTruncated);
 
@@ -205,14 +215,15 @@ namespace BlazorApp2.Data
                 request1.ResponseHeaderOverrides.ContentDisposition = $"{typeget}; filename={Uri.EscapeDataString(fileName)}";
                 //Console.WriteLine("+++++++++++++++++++++" + request1.ResponseHeaderOverrides.ContentDisposition);
                 urlString = _client.GetPreSignedURL(request1);
+                _logger.LogInformation("Generated Link: {0}", urlString);
             }
             catch (AmazonS3Exception e)
             {
-                Console.WriteLine("Error encountered on server. Message:'{0}' when writing an object", e.Message);
+                _logger.LogError("Error encountered on server. Message:'{0}' when writing an object", e.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Unknown encountered on server. Message:'{0}' when writing an object", e.Message);
+                _logger.LogError("Unknown encountered on server. Message:'{0}' when writing an object", e.Message);
             }
             return urlString;
         }
