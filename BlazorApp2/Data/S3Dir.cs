@@ -49,7 +49,6 @@ namespace BlazorApp2.Data
             _is3 = service;
             UserName = userName;
             rootPath = $"Users/{userName}/{typeFile.ToString()}";
-            Console.WriteLine("----------------- " + rootPath);
             //BackDirName = BackDirPath = "";
             //DirPath = DirName = userName;
             CurrentDir = new S3DirObject

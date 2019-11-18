@@ -1,4 +1,5 @@
-﻿@page "/UploadFiles"
+﻿@page "/"
+@page "/UploadFiles"
 @inject IS3Service _is3;
 @inject ApplicationContext _db;
 @inject IJSRuntime JsRuntime;
@@ -16,28 +17,25 @@
     <div class="my_sidebar__navigation">
         <div class="my_navigation__scroll">
             <div class="my_navigation__items_standard">
-                <MatButton Link="@UrlShared" >Перейти</MatButton>
+                <MatButton Link="@UrlShared">Перейти</MatButton>
                 <br />
-                <MatIconButton Icon="cloud_off" ToggleIcon="cloud_queue" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })"></MatIconButton>
-                <span>preview: @IsGetAttachment</span>
-                <strong> @(IsTimer ? Timer.ToString(@"hh\:mm\:ss") : "")</strong>
-                <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" ondblclick="myFunction('staticUrl')">
+                <MatIconButton Icon="cloud_queue" ToggleIcon="cloud_off" OnClick="@((e) => { IsGetAttachment = !IsGetAttachment; })"></MatIconButton>
+                <span class="my_span-timer">Preview</span>
+                <span class="my_span-timer"> @(IsTimer ? Timer.ToString(@"hh\:mm\:ss") : "")</span>
+                <input type="text" readonly class="form-control-plaintext" id="staticUrl" value="@UrlShared" @ondblclick="CopyText">
             </div>
         </div>
     </div>
     <div class="my_info-space">
-        <div class="alert alert-success" role="alert">
-            <strong>Well done!</strong> Good Boy!
-        </div>
         <div class="alert alert-info" role="alert">
-            <strong>XXX Link!</strong>
-            <a class="text-danger text-center" onclick="window.location.replace('/mat/matblazor')">Love Boy!</a>
+            <strong>Some Link!</strong>
+            <a class="text-danger text-center" onclick="window.location.replace('/Test/mat/matblazor')">Other Link</a>
         </div>
     </div>
 </div>
 <div class="my_root_content">
     <div class="root__content">
-        <ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@IsGetAttachment" EventNewFolder="EventNewFolder" @bind-DialogIsOpen="DialogIsOpen"/>
+        <ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@(!IsGetAttachment)" EventNewFolder="EventNewFolder" @bind-DialogIsOpen="DialogIsOpen" />
         <a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
     </div>
 </div>
@@ -49,7 +47,7 @@
 @code {
     [Parameter]
     public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
-    {
+{
         { "hidden", "" },
         { "id", "idfile"}
     };
@@ -120,6 +118,12 @@
         Toaster.Add(message, type, title, icon);
     }
 
+    public async Task CopyText()
+    {
+        await JsRuntime.InvokeAsync<object>("myFunction", "staticUrl");
+        ShowToast(MatToastType.Info, "Copied the text");
+    }
+
     async Task OpenDialog(ItemClickEventArgs e)
     {
         await JsRuntime.InvokeAsync<object>("my_opendialog", "idfile");
@@ -154,6 +158,7 @@
         }
         IsTimer = false;
         IsFirstSender = true;
+        UrlShared = null;
         await OnInitializedAsync();
 
         await InvokeAsync(StateHasChanged);
