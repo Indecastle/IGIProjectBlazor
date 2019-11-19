@@ -1,4 +1,6 @@
-﻿using Amazon.S3;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Amazon.S3.Util;
@@ -17,14 +19,28 @@ namespace BlazorApp2.Data
 {
     public class S3Service : IS3Service
     {
+        public bool IsTest { get; set; } = false;
         private readonly ILogger _logger;
         private readonly IAmazonS3 _client;
         public string BucketName { get; private set; }
-        public S3Service(IAmazonS3 client, ILogger<S3Service> logger, string bucketName = "igi-project")
+        public S3Service(IAmazonS3 client, ILogger<S3Service> logger, string bucketName = "igi-project", bool isTest = false)
         {
+            IsTest = isTest;
             _logger = logger;
-            _client = client;
+            //_client = client;
+            _client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", RegionEndpoint.EUCentral1);
+            //_client = new AmazonS3Client(new BasicAWSCredentials("kek", "lol"), new AmazonS3Config
+            //{
+            //    ServiceURL = "http://192.168.99.100:4572",
+            //    // Localstack supports HTTP only
+            //    UseHttp = true,
+            //    // Force bucket name go *after* hostname 
+            //    ForcePathStyle = true,
+            //    AuthenticationRegion = "eu-central-1"
+            //});
             BucketName = bucketName;
+            CreateBucketAsync().Wait();
+            InitBucketAsync().Wait();
         }
 
         public async Task CreateBucketAsync()
@@ -197,7 +213,7 @@ namespace BlazorApp2.Data
             //var arquivos = files.Select(x => Path.GetFileName(x.Key)).ToList();
         }
 
-        public string GeneratePreSignedURL(string filepath, bool attachment, string fileName = null)
+        public string GeneratePreSignedURL(string filepath, bool attachment, string fileName = null, bool useHttp = false)
         {
             string urlString = "";
             try
@@ -207,8 +223,7 @@ namespace BlazorApp2.Data
                     BucketName = BucketName,
                     Key = filepath,
                     Expires = DateTime.Now.AddMinutes(5),
-                    
-                    
+                    Protocol = useHttp || IsTest ? Protocol.HTTP : Protocol.HTTPS
                 };
                 string typeget = attachment ? "attachment" : "inline";
                 fileName = fileName ?? Path.GetFileName(filepath);

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Amazon.Runtime;
 
 namespace BlazorApp2.Data.Tests
 {
@@ -30,7 +31,16 @@ namespace BlazorApp2.Data.Tests
         [ClassInitialize]
         public static void StartInit(TestContext context)
         {
-            s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
+            //s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
+            s3Client = new AmazonS3Client(new BasicAWSCredentials("kek", "lol"), new AmazonS3Config
+            {
+                ServiceURL = "http://192.168.99.100:4572",
+                // Localstack supports HTTP only
+                UseHttp = true,
+                // Force bucket name go *after* hostname 
+                ForcePathStyle = true,
+                AuthenticationRegion = "eu-central-1"
+            }); 
             _s3 = new S3Service(s3Client, _logger, _bucketName);
         }
 

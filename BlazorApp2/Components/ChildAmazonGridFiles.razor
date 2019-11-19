@@ -6,18 +6,18 @@
 @if (IsSetFiles)
 {
     <ContextMenu Id="myMenu" AutoHide="true" Animation="Animation.Grow" CssClass="my_contextmenu">
-    <Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
-    <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
-    <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
-    <Seperator />
-    <Item>
-        Submenu
-        <SubMenu>
-            <Item OnClick="@OnClick">Submenu Item 1</Item>
-            <Item OnClick="@OnClick">Submenu Item 2</Item>
-        </SubMenu>
-    </Item>
-</ContextMenu>
+        <Item OnClick="@(async e => DeleteFileOrFolder(e))"> <i class="fas fa-trash-alt red-icon"></i> Delete</Item>
+        @*<Item> <i class="fas fa-sync-alt blue-icon"></i> Reload</Item>
+        <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
+        <Seperator />
+        <Item>
+            Submenu
+            <SubMenu>
+                <Item OnClick="@OnClick">Submenu Item 1</Item>
+                <Item OnClick="@OnClick">Submenu Item 2</Item>
+            </SubMenu>
+        </Item>*@
+    </ContextMenu>
 
 <ContextMenu Id="myBackmenu" AutoHide="true" Animation="Animation.Zoom" CssClass="my_contextmenu">
     <Item OnClick="@(async e => { await DialogIsOpenChanged.InvokeAsync(true); })"> <i class="fas fa-folder-plus" style="color: Tomato;"></i> Add Folder </Item>

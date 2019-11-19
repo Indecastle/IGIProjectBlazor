@@ -22,7 +22,7 @@
 }
 .my_gb_pb {
     border-radius: 4px;
-    color: #5f6368;
+    color: #5f6368 !important;
     display: inline-block;
     font: 400 12px/16px Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
     outline: 0;
@@ -35,7 +35,7 @@
     cursor: pointer;
 }
     .my_gb_pb:hover {
-        color: #1e1f21;
+        color: #000000 !important;
         text-decoration: none;
     }
 .my_gb_hb {

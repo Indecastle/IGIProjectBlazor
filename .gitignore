@@ -343,3 +343,4 @@ healthchecksdb
 BlazorApp2/Migrations/
 BlazorApp2/wwwroot/download/
 BlazorApp2/logger.log
+BlazorApp2/Logs/

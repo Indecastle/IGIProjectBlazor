@@ -60,6 +60,9 @@ namespace BlazorApp2.Services
             using (var scope = Services.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+                //IEnumerable<FastFile> tempFiles = from ff in _db.FastFiles
+                //                                  where ff.EndTime < DateTime.Now
+                //                                  select ff;
                 List<FastFile> tempFiles = _db.FastFiles.ToList();
                 foreach (FastFile file in tempFiles)
                 {

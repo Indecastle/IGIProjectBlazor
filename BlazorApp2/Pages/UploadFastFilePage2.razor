@@ -68,7 +68,7 @@
             IsFirstSender = false;
             IsTimer = true;
 
-            ffile.UpdateSpan(TimeSpan.FromSeconds(30));
+            ffile.UpdateSpan(TimeSpan.FromSeconds(60));
             string tempRootPath = "TempFiles/" + ffile.KeyName;
             await _is3.CreateFolderAsync(tempRootPath);
             await Dir.UpdateDirAsync();

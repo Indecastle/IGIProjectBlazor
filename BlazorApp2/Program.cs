@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace BlazorApp2
 {
@@ -42,12 +43,22 @@ namespace BlazorApp2
             host.Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(Directory.GetCurrentDirectory() + "/Logs/Log" + DateTime.Now.ToShortDateString() + ".log")
+                .CreateLogger();
+
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddSerilog();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseUrls("http://0.0.0.0:5000", "https://0.0.0.0:5001");
                     webBuilder.UseStartup<Startup>();
                 });
+        }
     }
 }

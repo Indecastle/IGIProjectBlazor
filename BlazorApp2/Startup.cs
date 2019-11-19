@@ -109,8 +109,8 @@ namespace BlazorApp2
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, NotifierService notifier, ILoggerFactory loggerFactory)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "logger.log");
-            loggerFactory.AddProvider(new FileLoggerProvider(filePath));
+            //string filePath = Path.Combine(Directory.GetCurrentDirectory(), "logger.log");
+            //loggerFactory.AddProvider(new FileLoggerProvider(filePath));
 
             if (env.IsDevelopment())
             {

@@ -12,6 +12,8 @@ using System.IO;
 using Amazon.S3.Transfer;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
+using Amazon.Runtime;
+using System.Threading;
 
 namespace BlazorApp2.Data.Tests
 {
@@ -19,7 +21,7 @@ namespace BlazorApp2.Data.Tests
     public class S3ServiceTests
     {
         private static readonly Logger<S3Service> _logger = new Logger<S3Service>(new LoggerFactory());
-        private const string _bucketName = "igi-project-tests2";
+        private const string _bucketName = "igi-project-tests3";
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.EUCentral1;
         private static IAmazonS3 s3Client;
         private static IS3Service _s3;
@@ -31,7 +33,16 @@ namespace BlazorApp2.Data.Tests
         [ClassInitialize]
         public static void StartInit(TestContext context)
         {
-            s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
+            //s3Client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", bucketRegion);
+            s3Client = new AmazonS3Client(new BasicAWSCredentials("kek2", "lol2"), new AmazonS3Config
+            {
+                ServiceURL = "http://192.168.99.100:4572",
+                // Localstack supports HTTP only
+                UseHttp = true,
+                // Force bucket name go *after* hostname 
+                ForcePathStyle = true,
+                AuthenticationRegion = "eu-central-1"
+            });
             _s3 = new S3Service(s3Client, _logger, _bucketName);
         }
 
@@ -64,6 +75,7 @@ namespace BlazorApp2.Data.Tests
         public void CreateUserAsyncTest()
         {
             _s3.CreateUserAsync("testUser").Wait();
+            Thread.Sleep(100);
 
             ListObjectsRequest request = new ListObjectsRequest
             {
@@ -88,8 +100,10 @@ namespace BlazorApp2.Data.Tests
             {
                 fileTransferUtility.UploadAsync(new MemoryStream(), _bucketName, filename).Wait();
             }
+            Thread.Sleep(100);
 
             _s3.DeleteFilesAsync("TestFolder").Wait();
+            Thread.Sleep(100);
 
             Assert.IsTrue(_s3.ListFilesAsync("TestFolder/").Result.Count() == 0);
         }
@@ -103,6 +117,7 @@ namespace BlazorApp2.Data.Tests
             {
                 fileTransferUtility.UploadAsync(new MemoryStream(), _bucketName, filename).Wait();
             }
+            Thread.Sleep(100);
 
 
             var listActual = _s3.ListFilesAsync("TestFolder").Result.Select(o => o.Key);
@@ -136,8 +151,9 @@ namespace BlazorApp2.Data.Tests
             {
                 fileTransferUtility.UploadAsync(new MemoryStream(Encoding.ASCII.GetBytes("Hello World")), _bucketName, filename).Wait();
             }
+            Thread.Sleep(100);
 
-            string Url = _s3.GeneratePreSignedURL("parentfile.kek", true);
+            string Url = _s3.GeneratePreSignedURL("parentfile.kek", true, useHttp: true);
             using (var client = new HttpClient())
             {
                 var response = client.GetAsync(Url).Result;
@@ -152,6 +168,7 @@ namespace BlazorApp2.Data.Tests
             bool IsOk = false;
             string testDirName = "TestCreateFolder/";
             _s3.CreateFolderAsync(testDirName).Wait();
+            Thread.Sleep(100);
 
             var objlist = _s3.ListFilesAsync(testDirName).Result;
             if (objlist.Count() == 1)
@@ -166,6 +183,7 @@ namespace BlazorApp2.Data.Tests
         public void InitBucketAsyncTest()
         {
             _s3.InitBucketAsync();
+            Thread.Sleep(100);
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = _bucketName,
@@ -184,6 +202,7 @@ namespace BlazorApp2.Data.Tests
         public void UploadObjectAsyncTest()
         {
             _s3.UploadObjectAsync(new MemoryStream(), "kek.KEK");
+            Thread.Sleep(100);
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = _bucketName,
