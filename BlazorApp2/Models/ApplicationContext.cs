@@ -18,6 +18,9 @@ namespace BlazorApp2.Models
             Database.EnsureCreated();
 
         }
-
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<FastFile>().HasQueryFilter(ffile => ffile.EndTime < DateTime.Now);
+        //}
     }
 }

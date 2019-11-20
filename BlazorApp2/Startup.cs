@@ -72,7 +72,9 @@ namespace BlazorApp2
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // HttpContextAccessor
+            services.AddHttpContextAccessor();
+            services.AddScoped<HttpContextAccessorService>();
 
             services.AddAuthentication()
                 .AddGoogle(options =>
@@ -88,7 +90,7 @@ namespace BlazorApp2
 
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddSingleton<NotifierService>();
+            //services.AddSingleton<NotifierService>();
             services.AddSingleton<IS3Service, S3Service>();
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
@@ -107,8 +109,9 @@ namespace BlazorApp2
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, NotifierService notifier, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory) // NotifierService notifier
         {
+            app.UseMiddleware<AuthMiddleware>();
             //string filePath = Path.Combine(Directory.GetCurrentDirectory(), "logger.log");
             //loggerFactory.AddProvider(new FileLoggerProvider(filePath));
 

@@ -1,6 +1,7 @@
 ﻿@page "/GetFiles/{KeyName}/"
 @inject IS3Service _is3;
 @inject ApplicationContext _db;
+@inject Services.HttpContextAccessorService HttpContext
 @inject IJSRuntime JsRuntime;
 @inject IMatToaster Toaster
 @implements IDisposable
@@ -39,6 +40,7 @@ else
     [Parameter]
     public string KeyName { get; set; }
     FastFile ffile;
+    private string Token { get; set; }
 
     [Parameter]
     public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
@@ -54,6 +56,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Token = HttpContext.Context.Request.Cookies["token"];
         IsTimer = true;
         ffile = _db.FastFiles.FirstOrDefault(f => f.KeyName == KeyName);
         if (ffile != null)

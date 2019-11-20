@@ -46,7 +46,7 @@ namespace BlazorApp2
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(Directory.GetCurrentDirectory() + "/Logs/Log" + DateTime.Now.ToShortDateString() + ".log")
+                .WriteTo.File(Directory.GetCurrentDirectory() + "/Logs/Log-" + DateTime.Now.ToShortDateString() + ".log")
                 .CreateLogger();
 
             return Host.CreateDefaultBuilder(args)

@@ -1,6 +1,7 @@
 ﻿@page "/UploadFastFilePage"
 @inject IS3Service _is3;
 @inject ApplicationContext _db;
+@inject Services.HttpContextAccessorService HttpContext
 @inject NavigationManager NavigationManager
 <h1>UploadFastFilePage</h1>
 
@@ -25,6 +26,7 @@
 </div>
 
 @code {
+    private string Token { get; set; }
     const string DefaultStatus = "Drop a text file here to view it, or click to choose a file";
     const int MaxFileSize = 5 * 1024 * 1024; // 5MB
     string status = DefaultStatus;
@@ -53,7 +55,7 @@
             {
                 Task task1 = file.Data.CopyToAsync(ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                FastFile ffile = new FastFile(file.Name, new TimeSpan(0, 0, 30));
+                FastFile ffile = new FastFile(file.Name, Token, new TimeSpan(0, 0, 30));
                 _db.FastFiles.Add(ffile);
                 await _db.SaveChangesAsync();
                 await task1;
@@ -67,6 +69,10 @@
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        Token = HttpContext.Context.Request.Cookies["token"];
+    }
 
     async Task UplaodFileToFast()
     {

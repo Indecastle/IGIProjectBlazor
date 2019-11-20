@@ -1,7 +1,9 @@
-﻿@page "/"
-@page "/UploadFiles"
+﻿@page "/UploadFiles"
+@page "/UploadFiles/{KeyNameUri}/"
 @inject IS3Service _is3;
 @inject ApplicationContext _db;
+@inject Services.HttpContextAccessorService HttpContext
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime;
 @inject IMatToaster Toaster
 @implements IDisposable
@@ -35,7 +37,7 @@
 </div>
 <div class="my_root_content">
     <div class="root__content">
-        <ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@(!IsGetAttachment)" EventNewFolder="EventNewFolder" @bind-DialogIsOpen="DialogIsOpen" />
+        <ChildAmazonGridFiles IsSetFiles="true" Dir="@Dir" IsGetAttachment="@IsGetAttachment" EventNewFolder="EventNewFolder" @bind-DialogIsOpen="DialogIsOpen" />
         <a href="@UrlShared" class="card-link " target="_blank">@UrlShared</a>
     </div>
 </div>
@@ -45,6 +47,9 @@
 
 
 @code {
+    [Parameter]
+    public string KeyNameUri { get; set; }
+    private string Token { get; set; }
     [Parameter]
     public Dictionary<string, object> InputFileAttributes { get; set; } = new Dictionary<string, object>()
 {
@@ -63,28 +68,52 @@
 
     public async Task EventNewFolder()
     {
+        if(KeyNameUri == null)
+            NavigationManager.NavigateTo("UploadFiles/" + ffile.KeyName + '/');
         if (IsFirstSender)
         {
-            IsFirstSender = false;
-            IsTimer = true;
-
-            ffile.UpdateSpan(TimeSpan.FromSeconds(60));
+            ffile.UpdateSpan(TimeSpan.FromSeconds(20));
             string tempRootPath = "TempFiles/" + ffile.KeyName;
             await _is3.CreateFolderAsync(tempRootPath);
             await Dir.UpdateDirAsync();
 
             _db.FastFiles.Add(ffile);
             await _db.SaveChangesAsync();
-            UrlShared = $"https://localhost:5001/GetFiles/{ffile.KeyName}/";
-            Timer_Tick();
-            StateHasChanged();
+
+            StartTimer();
         }
+    }
+    public void StartTimer()
+    {
+        IsFirstSender = false;
+        IsTimer = true;
+        UrlShared = $"https://localhost:5001/GetFiles/{ffile.KeyName}/";
+        Timer_Tick();
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        KeyShared = Guid.NewGuid();
-        ffile = new FastFile(KeyShared, new TimeSpan(0, 0, 30));
+        Token = HttpContext.Context.Request.Cookies["token"];
+        if(KeyNameUri != null)
+        {
+            ffile = _db.FastFiles.FirstOrDefault(f => f.KeyName == KeyNameUri);
+            if(ffile?.Token == Token)
+            {
+                StartTimer();
+            }
+            else
+            {
+                NavigationManager.NavigateTo("UploadFiles");
+                return;
+            }
+        }
+        else
+        {
+            KeyShared = Guid.NewGuid();
+            ffile = new FastFile(KeyShared, Token, new TimeSpan(0, 0, 60));
+        }
+
         if (KeyShared != null)
         {
             string tempRootPath = "TempFiles/" + ffile.KeyName;
@@ -148,7 +177,7 @@
 
     bool IsTimer { get; set; }
     TimeSpan Timer { get; set; }
-    async Task Timer_Tick()
+    async void Timer_Tick()
     {
         while (IsTimer && ffile.EndTime > DateTime.Now)
         {
@@ -156,12 +185,8 @@
             await InvokeAsync(StateHasChanged);
             await Task.Delay(1000);
         }
-        IsTimer = false;
-        IsFirstSender = true;
-        UrlShared = null;
-        await OnInitializedAsync();
-
-        await InvokeAsync(StateHasChanged);
+        if(IsTimer) // is not Disposed
+            NavigationManager.NavigateTo("UploadFiles", true);
     }
 
     public void Dispose()

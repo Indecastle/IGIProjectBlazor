@@ -13,7 +13,8 @@ namespace BlazorApp2.Models
         [Key]
         public Guid Id { get; set; }
         public string Name { get; set; } // название файла
-        public string KeyName { get; set; } // Путь к файлу на amazon
+        public string KeyName { get; set; } // название папки на amazon
+        public string Token { get; set; } // Токен пользователя
         public DateTime DateTime { get; set; } // дата загрузки
         public DateTime EndTime { get; set; } // дата смерти
 
@@ -21,17 +22,19 @@ namespace BlazorApp2.Models
             Id = Guid.NewGuid(); 
         }
 
-        public FastFile(string name, TimeSpan tspan)
+        public FastFile(string name, string token, TimeSpan tspan)
         {
             Id = Guid.NewGuid();
+            Token = token;
             Name = name; DateTime = DateTime.Now;
             EndTime = DateTime.Add(tspan);
             KeyName = $"{Name}-{Id}";
         }
 
-        public FastFile(Guid id, TimeSpan tspan)
+        public FastFile(Guid id, string token, TimeSpan tspan)
         {
             Id = id;
+            Token = token;
             Name = id.ToString(); DateTime = DateTime.Now;
             EndTime = DateTime.Add(tspan);
             KeyName = $"folder-{Name}";

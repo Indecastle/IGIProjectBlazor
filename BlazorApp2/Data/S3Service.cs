@@ -27,8 +27,8 @@ namespace BlazorApp2.Data
         {
             IsTest = isTest;
             _logger = logger;
-            //_client = client;
-            _client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", RegionEndpoint.EUCentral1);
+            _client = client;
+            ////_client = new AmazonS3Client(@"AKIAJIWS43VCUBTJTIHA", @"BeDW76mYMgTjLUVyQ//WK1uo7qw43z82ldegxwoE", RegionEndpoint.EUCentral1);
             //_client = new AmazonS3Client(new BasicAWSCredentials("kek", "lol"), new AmazonS3Config
             //{
             //    ServiceURL = "http://192.168.99.100:4572",

@@ -14,7 +14,6 @@ namespace BlazorApp2.Services
 {
     public class LifeCycleBackgroundService : IHostedService, IDisposable
     {
-        private int counter1, counter2;
         private int executionCount = 0;
         private readonly ILogger _logger;
         private Timer _timer;
@@ -36,9 +35,9 @@ namespace BlazorApp2.Services
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
 
-            _logger.LogInformation("Timed Hosted Service running.#########################");
+            _logger.LogInformation("Timed Hosted Service is running.");
 
             return Task.CompletedTask;
         }
@@ -46,8 +45,6 @@ namespace BlazorApp2.Services
         private async void DoWork(object state)
         {
             executionCount++;
-            counter1 += 1;
-            counter2 += 2;
             //Console.WriteLine($"c1: {counter1}, c2: {counter2}");
             //_logger.LogTrace("Trace: Timed Hosted Service...");
             //_logger.LogDebug("Debug: Timed Hosted Service...");
@@ -56,33 +53,30 @@ namespace BlazorApp2.Services
             //_logger.LogError("Error: Timed Hosted Service...");
             //_logger.LogCritical("Critical: Timed Hosted Service...");
 
-            _logger.LogDebug( "Timed Hosted Service is working. Count: {Count}", executionCount);
+            _logger.LogDebug("Timed Hosted Service is working. Count: {Count}", executionCount);
             using (var scope = Services.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                //IEnumerable<FastFile> tempFiles = from ff in _db.FastFiles
-                //                                  where ff.EndTime < DateTime.Now
-                //                                  select ff;
-                List<FastFile> tempFiles = _db.FastFiles.ToList();
+                List<FastFile> tempFiles = (    from ff in _db.FastFiles
+                                                where ff.EndTime < DateTime.Now
+                                                select ff ).ToList();
+                //List<FastFile> tempFiles = _db.FastFiles.ToList();
                 foreach (FastFile file in tempFiles)
                 {
-                    if (file.EndTime < DateTime.Now)
+                    try
                     {
-                        try
-                        {
-                            await _is3.DeleteFilesAsync("TempFiles/" + file.KeyName);
-                            _db.FastFiles.Remove(file);
-                            await _db.SaveChangesAsync();
-                        }
-                        catch (AmazonS3Exception e)
-                        {
-                            _logger.LogError("Error encountered on server. Message: '{0}' when writing an object", e.Message);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.LogError("Unknown Exception {0}", e.Message);
-                            throw;
-                        }
+                        await _is3.DeleteFilesAsync("TempFiles/" + file.KeyName);
+                        _db.FastFiles.Remove(file);
+                        await _db.SaveChangesAsync();
+                    }
+                    catch (AmazonS3Exception e)
+                    {
+                        _logger.LogError("Error encountered on server. Message: '{0}' when writing an object", e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError("Unknown Exception {0}", e.Message);
+                        throw;
                     }
                 }
             }
@@ -91,9 +85,7 @@ namespace BlazorApp2.Services
         public Task StopAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Timed Hosted Service is stopping.");
-
             _timer?.Change(Timeout.Infinite, 0);
-
             return Task.CompletedTask;
         }
 
