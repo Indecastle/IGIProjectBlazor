@@ -18,6 +18,10 @@
     align-items: center;
 }
 
+.my_sidebar_left {
+    background-image: linear-gradient(180deg, #546e7a 0%, #111213 70%) !important;
+}
+
 
 
 .my_bodystyle {

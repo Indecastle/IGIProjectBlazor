@@ -1,4 +1,4 @@
-﻿
+﻿@inject NavigationManager NavigationManager
 
 <AuthorizeView>
     <Authorized>
@@ -21,27 +21,25 @@
     </Authorized>
     <NotAuthorized>
         @*<form action="/Auth/Account/LoginFast" method="post" class="form-inline">
-            <div class="form-group mb-2">
-                <input type="text" class="form-control" placeholder="User Name" id="Username" name="Username" />
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <input type="Password" class="form-control" placeholder="Password" id="Password" name="Password" />
-            </div>
-                <input type="submit" class="btn btn-primary mb-2" value="Войти"/>
-        </form>*@
-        <a class="ml-md-auto btn btn-primary"
-           href="/Auth/Account/Login"
-           target="_top">Войти</a>
+                <div class="form-group mb-2">
+                    <input type="text" class="form-control" placeholder="User Name" id="Username" name="Username" />
+                </div>
+                <div class="form-group mx-sm-3 mb-2">
+                    <input type="Password" class="form-control" placeholder="Password" id="Password" name="Password" />
+                </div>
+                    <input type="submit" class="btn btn-primary mb-2" value="Войти"/>
+            </form>*@
+        <MatButton Unelevated="true" @onclick="@RunOnClick">Войти</MatButton>
         @*<input type="text"
-               placeholder="User Name"
-               @bind="@Username" />
-        &nbsp;&nbsp;
-        <input type="password"
-               placeholder="Password"
-               @bind="@Password" />
-        <a class="ml-md-auto btn btn-primary"
-           href="/Auth/Account/loginFast?paramUsername=@Username&paramPassword=@Password"
-           target="_top">Login</a>*@
+                   placeholder="User Name"
+                   @bind="@Username" />
+            &nbsp;&nbsp;
+            <input type="password"
+                   placeholder="Password"
+                   @bind="@Password" />
+            <a class="ml-md-auto btn btn-primary"
+               href="/Auth/Account/loginFast?paramUsername=@Username&paramPassword=@Password"
+               target="_top">Login</a>*@
     </NotAuthorized>
 </AuthorizeView>
 @code {
@@ -53,5 +51,10 @@
     public void OnOpenMenu(MouseEventArgs e)
     {
         this.Menu.OpenAsync();
+    }
+
+    public void RunOnClick(MouseEventArgs e)
+    {
+        NavigationManager.NavigateTo("/Auth/Account/Login", true);
     }
 }

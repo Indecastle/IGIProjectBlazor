@@ -98,6 +98,7 @@
     display: -webkit-flex;
     display: flex;
     box-sizing: border-box;
+    padding-left: 70px;
 }
 
 .my_index_background {

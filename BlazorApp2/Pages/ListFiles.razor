@@ -9,11 +9,7 @@
 
 <AuthorizeView>
     <Authorized>
-
-        <MatThemeProvider Theme="@theme1">
-            <AmazonGrid PageSize="10" GetUserName="GetUserName" GetIsAuth="GetIsAuth" />
-        </MatThemeProvider>
-
+        <AmazonGrid PageSize="10" GetUserName="GetUserName" GetIsAuth="GetIsAuth" />
     </Authorized>
     <NotAuthorized>
         <h2>"Bad Guy"</h2>
@@ -40,10 +36,4 @@
         var user = authState.User;
         return user.Identity.Name;
     }
-
-    MatTheme theme1 = new MatTheme()
-    {
-        Primary = MatThemeColors.Orange._500.Value,
-        Secondary = MatThemeColors.LightGreen._500.Value
-    };
 }

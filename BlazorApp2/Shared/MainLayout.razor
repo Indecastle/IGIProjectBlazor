@@ -38,7 +38,7 @@
 
         <MatDrawerContainer>
             <MatDrawer @bind-Opened="@Opened" Mode="@MatDrawerMode.Modal" Style="z-index: 100;">
-                <div class="sidebar" style="width: 100%">
+                <div class="sidebar my_sidebar_left" style="width: 100%">
                     <NavMenu @bind-SideBar="Opened" />
                 </div>
             </MatDrawer>
@@ -66,7 +66,7 @@
 
     MatTheme theme1 = new MatTheme()
     {
-        Primary = "#4a148c",
-        Secondary = "#6a1b9a"
+        Primary = "#546e7a",
+        Secondary = "#00acc1"
     };
 }
